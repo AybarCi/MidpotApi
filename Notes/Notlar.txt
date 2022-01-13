@@ -1,0 +1,7 @@
+﻿# server tatrih ayarlama
+# bu komut listeyi veriyor
+timedatectl list-timezones
+# bu istanbul zone'u
+Europe/Istanbul
+# bu komut güncelliyor
+sudo timedatectl set-timezone Europe/Istanbul

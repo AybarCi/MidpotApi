@@ -1,0 +1,117 @@
+﻿--TRUNCATE "Message"
+--TRUNCATE "Match"
+
+--function yükle sırasıyla aşağıdaki gibi
+--cube yükle
+--earthdistance yükle
+
+
+/* son hali */
+
+--erkek kız
+CREATE OR REPLACE FUNCTION get_male_match(userId int8, latitude float8, longitude float8, myage int4, distanceLimit int4, fromDate timestamp, untilDate timestamp)
+RETURNS TABLE (Id int8, PersonName text, BirthDate timestamp, ProfilePhoto text, Description text, School text, Job text) AS $$
+BEGIN
+  RETURN QUERY
+select u."Id", u."PersonName", u."BirthDate", u."ProfilePhoto", u."Description", u."School", u."Job" from "identity"."AspNetUsers" u  
+left join "post"."Match" m 
+on u."Id" = m."FemaleUser" and m."MaleUser" = userId
+where u."LockoutEnabled" = false and u."Gender" = false and u."PreferredGender" = true and u."Id" != userId 
+and (m."CreateDate" + interval '1' day < now() or m."CreateDate" is null) 
+and (u."FromAge" <= myage and  u."UntilAge" >= myage) 
+and (fromDate >= u."BirthDate" and untilDate <= u."BirthDate") 
+and (m."MaleUser" != userId or m."MaleUser" is null)
+and (point(u."Longitude" , u."Latitude")<@>point(longitude, latitude)) * 1.609344 < distanceLimit
+order by u."LastLoginDate" desc 
+fetch first 1 rows only;
+END
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_male_match(17, 40.981000, 28.779258 ,28, 100, DATE '2000-07-18 00:00:00', DATE '1980-07-18 00:00:00');
+
+
+
+--kız erkek
+CREATE OR REPLACE FUNCTION get_female_match(userId int8, latitude float8, longitude float8, myage int4, distanceLimit int4, fromDate timestamp, untilDate timestamp)
+RETURNS TABLE (Id int8, PersonName text, BirthDate timestamp, ProfilePhoto text, Description text, School text, Job text) AS $$
+BEGIN
+  RETURN QUERY
+select u."Id", u."PersonName", u."BirthDate", u."ProfilePhoto", u."Description", u."School", u."Job" from "identity"."AspNetUsers" u  
+left join "post"."Match" m 
+on u."Id" = m."MaleUser" and m."FemaleUser" = userId
+where u."LockoutEnabled" = false and u."Gender" = true and u."PreferredGender" = false and u."Id" != userId 
+and (m."CreateDate" + interval '1' day < now() or m."CreateDate" is null) 
+and (u."FromAge" <= myage and  u."UntilAge" >= myage) 
+and (fromDate >= u."BirthDate" and untilDate <= u."BirthDate") 
+and (m."FemaleUser" != userId or m."FemaleUser" is null)
+and (point(u."Longitude" , u."Latitude")<@>point(longitude, latitude)) * 1.609344 < distanceLimit
+order by u."LastLoginDate" desc 
+fetch first 1 rows only;
+END
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_female_match(5, 40.981000, 28.779258, 21, 100, DATE '2000-07-18 00:00:00', DATE '1980-07-18 00:00:00');
+
+
+--ec
+CREATE OR REPLACE FUNCTION get_ec_match(userId int8,gender bool, latitude float8, longitude float8, myage int4, distanceLimit int4, fromDate timestamp, untilDate timestamp)
+RETURNS TABLE (Id int8, PersonName text, BirthDate timestamp, ProfilePhoto text, Description text, School text, Job text) AS $$
+BEGIN
+  RETURN QUERY
+select u."Id", u."PersonName", u."BirthDate", u."ProfilePhoto", u."Description", u."School", u."Job" from "identity"."AspNetUsers" u  
+left join "post"."Match" m 
+on (u."Id" = m."MaleUser" or u."Id" = m."FemaleUser") and (m."FemaleUser" = userId or m."MaleUser" = userId)  
+where u."LockoutEnabled" = false and u."Gender" = gender and u."PreferredGender" = gender and u."Id" != userId 
+and (m."CreateDate" + interval '1' day < now() or m."CreateDate" is null) 
+and (u."FromAge" <= myage and  u."UntilAge" >= myage) 
+and (fromDate >= u."BirthDate" and untilDate <= u."BirthDate") 
+and (m."MaleUser" != userId or m."MaleUser" is null)
+and (m."FemaleUser" != userId or m."FemaleUser" is null)
+and (point(u."Longitude" , u."Latitude")<@>point(longitude, latitude)) * 1.609344 < distanceLimit
+order by u."LastLoginDate" desc 
+fetch first 1 rows only;
+END
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM get_ec_match(5, false, 40.981000, 28.779258, 18, 100, DATE '2000-07-18 00:00:00', DATE '1980-07-18 00:00:00');
+
+/* son hali */
+ 
+
+
+/*denemeler*/
+
+--ec
+select u."Id", u."PersonName", u."BirthDate", u."ProfilePhoto", u."Description", u."School", u."Job" from "identity"."AspNetUsers" u  
+left join "post"."Match" m 
+on (u."Id" = m."MaleUser" or u."Id" = m."FemaleUser") and (m."FemaleUser" = 7 or m."MaleUser" = 7)  
+where u."LockoutEnabled" = false and u."Gender" = false and u."PreferredGender" = false and u."Id" != 7 
+and (m."CreateDate" + interval '1' day < now() or m."CreateDate" is null) 
+and (u."FromAge" <= 25 and  u."UntilAge" >= 25) 
+and ('2004-07-18 00:00:00' >= u."BirthDate" and '1980-07-18 00:00:00' <= u."BirthDate") 
+and (m."MaleUser" != 7 or m."MaleUser" is null)
+and (m."FemaleUser" != 7 or m."FemaleUser" is null)
+and (point(u."Longitude" , u."Latitude")<@>point(28.779258, 40.981000)) * 1.609344 < 150
+order by u."LastLoginDate" desc 
+fetch first 1 rows only;
+
+
+
+
+
+
+--erk
+select u."Id", u."PersonName", u."BirthDate", u."ProfilePhoto", u."Description", u."School", u."Job" from "identity"."AspNetUsers" u  
+left join "post"."Match" m 
+on u."Id" = m."FemaleUser" and m."MaleUser" = 17  
+where u."LockoutEnabled" = false and u."Gender" = false and u."PreferredGender" = true
+and (m."CreateDate" + interval '1' day < now() or m."CreateDate" is null) 
+and (point(u."Longitude" , u."Latitude")<@>point(28.779258, 40.981000)) * 1.609344 < 150
+and (u."FromAge" <= 25 and  u."UntilAge" >= 25) 
+and ('2004-07-18 00:00:00' >= u."BirthDate" and '1980-07-18 00:00:00' <= u."BirthDate") 
+and (m."MaleUser" != 17 or m."MaleUser" is null)
+order by u."LastLoginDate" desc 
+fetch first 1 rows only;
+
+
+/*denemeler*/
