@@ -28,6 +28,20 @@ namespace DatingWeb.Repository.Chat
             await _context.SaveChangesAsync();
             return mess.MessageId;
         }
+        public async Task<bool> ReadMessage(List<long> messageIds)
+        {
+            var messages = _context.Message.Where(d => messageIds.Contains(d.MessageId) && d.IsRead != true).ToList();
+            if (messages.Count > 0)
+            {
+                foreach (var message in messages)
+                {
+                    message.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+            
+            return true;
+        }
 
         public async Task<List<MessageResponse>> LoadConversation(long userId, long matchId, long lastUpdateId)
         {
@@ -55,17 +69,16 @@ namespace DatingWeb.Repository.Chat
             }
         }
 
-        public async Task<List<NewMessagesResponse>> GetNewMessages(long userId, DateTime LastSawMessagesDate)
+        public async Task<List<NewMessagesResponse>> GetNewMessages(long userId)
         {
             var matches = await _context.Match.Where(x => x.FemaleUser == userId || x.MaleUser == userId).Select(x=> x.MatchId).ToListAsync();
             if (matches.Count > 0)
             {
-                return await _context.Message.Where(x => matches.Contains(x.MatchId) && x.CreateDate > LastSawMessagesDate && x.UserId != userId).GroupBy(x => x.UserId).Select(
+                return await _context.Message.Where(x => matches.Contains(x.MatchId) && x.IsRead == false && x.UserId != userId).GroupBy(x => x.UserId).Select(
                         x => new NewMessagesResponse
                         {
                             UserId = x.Key,
-                            MessageCount = x.Count(),
-                            IsRead = false,
+                            MessageCount = x.Count()
                         }
                     ).ToListAsync();
             }

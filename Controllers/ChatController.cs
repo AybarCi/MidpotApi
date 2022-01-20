@@ -2,6 +2,7 @@
 using DatingWeb.Repository.Chat.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace DatingWeb.Controllers
@@ -23,9 +24,14 @@ namespace DatingWeb.Controllers
             return Ok(await _chatRepository.LoadConversation(this.GetUserId, model.MatchId, model.LastUpdateId));
         }
         [HttpPost("get-new-messages")]
-        public async Task<IActionResult> GetNewMessages([FromBody] GetNewMessagesRequest request)
+        public async Task<IActionResult> GetNewMessages()
         {
-            return Ok(await _chatRepository.GetNewMessages(this.GetUserId, request.LastSawMessagesDate));     
+            return Ok(await _chatRepository.GetNewMessages(this.GetUserId));     
+        }
+        [HttpPost("read-messages")]
+        public async Task<IActionResult> ReadMessages([FromBody]ReadMessagesRequest request)
+        {
+            return Ok(await _chatRepository.ReadMessage(request.MessageIds));
         }
     }
 }

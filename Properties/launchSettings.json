@@ -14,7 +14,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "185.247.139.4"
+        "CHAT": "91.151.88.103"
       }
     },
     "Custom": {

@@ -15,5 +15,6 @@ namespace DatingWeb.Data.DbModel
         public string Chat { get; set; }
         public DateTime CreateDate { get; set; }
         public string IpAddress { get; set; }
+        public bool IsRead { get; set; }
     }
 }
