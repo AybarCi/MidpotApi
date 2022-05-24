@@ -28,9 +28,9 @@ namespace DatingWeb.Repository.Chat
             await _context.SaveChangesAsync();
             return mess.MessageId;
         }
-        public async Task<bool> ReadMessage(List<long> messageIds)
+        public async Task<bool> ReadMessages(long matchId, long matchedUserId)
         {
-            var messages = _context.Message.Where(d => messageIds.Contains(d.MessageId) && d.IsRead != true).ToList();
+            var messages = _context.Message.Where(d => d.MatchId == matchId && d.UserId == matchedUserId && d.IsRead != true).ToList();
             if (messages.Count > 0)
             {
                 foreach (var message in messages)
@@ -40,6 +40,18 @@ namespace DatingWeb.Repository.Chat
                 await _context.SaveChangesAsync();
             }
             
+            return true;
+        }
+
+        public async Task<bool> ReadMessage(long messageId)
+        {
+            var message = await _context.Message.Where(d => d.MessageId == messageId).FirstOrDefaultAsync();
+            if (message != null)
+            {
+                message.IsRead = true;
+                await _context.SaveChangesAsync();
+            }
+
             return true;
         }
 
@@ -71,7 +83,7 @@ namespace DatingWeb.Repository.Chat
 
         public async Task<List<NewMessagesResponse>> GetNewMessages(long userId)
         {
-            var matches = await _context.Match.Where(x => x.FemaleUser == userId || x.MaleUser == userId).Select(x=> x.MatchId).ToListAsync();
+            var matches = await _context.Match.Where(x => x.FemaleUser == userId || x.MaleUser == userId && x.IsActive == true).Select(x=> x.MatchId).ToListAsync();
             if (matches.Count > 0)
             {
                 return await _context.Message.Where(x => matches.Contains(x.MatchId) && x.IsRead == false && x.UserId != userId).GroupBy(x => x.UserId).Select(

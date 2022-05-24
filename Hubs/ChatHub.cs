@@ -21,7 +21,6 @@ namespace DatingWeb.Hubs
             _httpContextAccessor = httpContextAccessor;
             _cache = cache;
         }
-
         public async Task GetConnectionId(string conversationId)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, conversationId);

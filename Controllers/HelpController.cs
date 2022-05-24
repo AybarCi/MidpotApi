@@ -4,6 +4,7 @@ using System;
 
 namespace DatingWeb.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class HelpController : BaseController
@@ -27,7 +28,7 @@ namespace DatingWeb.Controllers
         public IActionResult Chat()
         {
             //var chat = Environment.GetEnvironmentVariable("CHAT");
-            return Ok(new { ipaddress = "http://185.247.139.4:55000" });
+            return Ok(new { ipaddress = "https://api.midpot.app" });
         }
     }
 }

@@ -15,9 +15,19 @@ namespace DatingWeb.SignalrHelper
 
         public async Task Invoke(HttpContext httpContext)
         {
-            if (httpContext.Request.Path.StartsWithSegments("/chat", StringComparison.OrdinalIgnoreCase) && httpContext.Request.Query.TryGetValue("access_token", out var accessToken))
-                httpContext.Request.Headers.Add("Authorization", $"Bearer {accessToken}");
+            if (httpContext.Request.Path.StartsWithSegments("/chat", StringComparison.OrdinalIgnoreCase)
+                && httpContext.Request.Query.TryGetValue("access_token", out var accessToken))
+                try
+                {
+                    httpContext.Request.Headers.Remove("Authorization");
+                    httpContext.Request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
+                    await _next(httpContext);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
             await _next(httpContext);
         }
     }

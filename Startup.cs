@@ -37,6 +37,9 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.AspNetCore.SignalR;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace DatingWeb
 {
@@ -54,94 +57,23 @@ namespace DatingWeb
         {
             System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-            services.AddSignalR(options =>
-            {
-                options.EnableDetailedErrors = true;
-            });
-            //services.AddSignalR();
-            //Burayi geri actim
-            //services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
-            //{
-            //    builder
-            //        .AllowAnyMethod()
-            //        .AllowAnyHeader()
-            //        .AllowAnyOrigin();
-            //}));
+
+ 
             services.AddMemoryCache();
             services.AddHttpClient();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("ClientPermission", policy =>
                 {
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins("http://localhost:5000")
                         .AllowCredentials();
                 });
             });
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(Configuration.GetConnectionString("PostgreConnection")));
-
-            //services.AddIdentity<ApplicationUser, IdentityRole<long>>(options =>
-            //{
-            //    //options.SignIn.RequireConfirmedAccount = true;
-            //    options.Password.RequiredLength = 6; //En az ka? karakterli olmas? gerekti?ini belirtiyoruz.
-            //    options.Password.RequireNonAlphanumeric = false; //Alfanumerik zorunlulu?unu kald?r?yoruz.
-            //    options.Password.RequireLowercase = false; //K???k harf zorunlulu?unu kald?r?yoruz.
-            //    options.Password.RequireUppercase = false; //B?y?k harf zorunlulu?unu kald?r?yoruz.
-            //    options.Password.RequireDigit = false; //0-9 aras? say?sal karakter zorunlulu?unu kald?r?yoruz.
-            //    //options.User.RequireUniqueEmail = true; //Email adreslerini tekille?tiriyoruz.
-            //    //_.User.AllowedUserNameCharacters = "abc?defghi?jklmno?pqrs?tu?vwxyzABC?DEFGHI?JKLMNO?PQRS?TU?VWXYZ0123456789-._@+"; //Kullan?c? ad?nda ge?erli olan karakterleri belirtiyoruz.
-            //    options.ClaimsIdentity.SecurityStampClaimType = "AspNet.Identity.MobileCore.SecurityStamp";
-            //}).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
-
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    // Cookie settings
-            //    options.AccessDeniedPath = "/accessdenied";
-            //    options.Cookie.Name = "mobiapicookie";
-            //    options.Cookie.HttpOnly = true;
-            //    options.ExpireTimeSpan = TimeSpan.FromHours(Configuration.GetValue<int>("Tokens:Lifetime"));
-            //    options.LoginPath = "/login";
-            //    // ReturnUrlParameter requires 
-            //    //using Microsoft.AspNetCore.Authentication.Cookies;
-            //    options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
-            //    options.SlidingExpiration = true;
-            //});
-
-            //services.Configure<SecurityStampValidatorOptions>(options =>
-            //{
-            //    // enables immediate logout, after updating the user's stat.
-            //    options.ValidationInterval = TimeSpan.FromSeconds(1);
-            //});
-
-            //var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"]));
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddJwtBearer(config =>
-            //{
-            //    config.RequireHttpsMetadata = false;
-            //    config.SaveToken = false; // TODO: Check later! Ara?t?r
-            //    config.TokenValidationParameters = new TokenValidationParameters()
-            //    {
-            //        IssuerSigningKey = signingKey,
-            //        ValidateAudience = true,
-            //        ValidAudience = this.Configuration["Tokens:Audience"],
-            //        ValidateIssuer = true,
-            //        ValidIssuer = this.Configuration["Tokens:Issuer"],
-            //        ValidateLifetime = true,
-            //        ValidateIssuerSigningKey = true,
-            //        ClockSkew = TimeSpan.Zero
-            //    };
-            //});
-
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Project API", Version = "v1" });
-            //});
-
 
             services.AddIdentityCore<ApplicationUser>(options =>
             {
@@ -151,8 +83,6 @@ namespace DatingWeb
                 options.Password.RequireUppercase = false; //B?y?k harf zorunlulu?unu kald?r?yoruz.
                 options.Password.RequireDigit = false; //0-9 aras? say?sal karakter zorunlulu?unu kald?r?yoruz.
                 options.User.AllowedUserNameCharacters = null;
-                //options.User.RequireUniqueEmail = true; //Email adreslerini tekille?tiriyoruz.
-                //options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=*-._@+"; //Kullan?c? ad?nda ge?erli olan karakterleri belirtiyoruz.
             }).AddClaimsPrincipalFactory<UserClaimsPrincipalFactory<ApplicationUser>>()
                     .AddEntityFrameworkStores<ApplicationDbContext>()
                     .AddSignInManager<SignInManager<ApplicationUser>>()
@@ -192,14 +122,24 @@ namespace DatingWeb
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
-            //var key = Encoding.ASCII.GetBytes(Configuration["Tokens:Key"]);
-            //services.AddAuthentication(x =>
-            //{
-            //    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddIdentityCookies();
+            services.AddSignalR();
 
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
@@ -250,11 +190,7 @@ namespace DatingWeb
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseDeveloperExceptionPage();
-            //}
-
+            
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
@@ -262,23 +198,22 @@ namespace DatingWeb
                 options.SwaggerEndpoint(endpointUrl, "Project API");
             });
 
-            //bunu tekrar actim
             app.UseCors("CorsPolicy");
             app.UseCors("ClientPermission");
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
 
-            app.UseMiddleware<WebSocketsMiddleware>();
+            //app.UseMiddleware<WebSocketsMiddleware>();
             app.UseMiddleware<ResponseWrapper>();
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseWebSockets();
 
+            app.UseWebSockets();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -287,6 +222,8 @@ namespace DatingWeb
                     options.Transports = HttpTransportType.WebSockets;
                 });
             });
+            
+
         }
     }
 }

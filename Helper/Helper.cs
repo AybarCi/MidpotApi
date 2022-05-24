@@ -12,7 +12,8 @@ namespace DatingWeb.Helper
         }
         public async Task Invoke(HttpContext context)
         {
-            string errorMessage = string.Empty; try
+            string errorMessage = string.Empty;
+            try
             {
                 await _next(context);
             }

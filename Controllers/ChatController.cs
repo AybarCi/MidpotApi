@@ -31,7 +31,12 @@ namespace DatingWeb.Controllers
         [HttpPost("read-messages")]
         public async Task<IActionResult> ReadMessages([FromBody]ReadMessagesRequest request)
         {
-            return Ok(await _chatRepository.ReadMessage(request.MessageIds));
+            return Ok(await _chatRepository.ReadMessages(request.MatchId, request.MatchedUserId));
+        }
+        [HttpPost("read-message")]
+        public async Task<IActionResult> ReadMessage(long messageId)
+        {
+            return Ok(await _chatRepository.ReadMessage(messageId));
         }
     }
 }

@@ -69,7 +69,16 @@ namespace DatingWeb.Repository.Settings
         {
             var setting = await _context.Setting.Where(x => x.Key == key).FirstOrDefaultAsync();
             setting.Value = value;
-            int val = await _context.SaveChangesAsync();
+            int val = 0;
+            try
+            {
+                val = await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message.ToString());
+            }
+            
 
             _cache.Set(key, setting.Value, TimeSpan.FromHours(1000));
 

@@ -5,7 +5,8 @@ namespace DatingWeb.Model.Request
 {
     public class ReadMessagesRequest
     {
-        public List<long> MessageIds { get; set; }
+        public long MatchId { get; set; }
+        public long MatchedUserId { get; set; }
     }
 }
 

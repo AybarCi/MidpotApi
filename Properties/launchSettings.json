@@ -14,16 +14,16 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "91.151.88.103"
+        "CHAT": "api.midpot.app"
       }
     },
-    "Custom": {
+    "DatingWeb": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://192.168.0.23:5000;https://192.168.0.23:5001",
+      "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "91.151.88.103"
+        "CHAT": "api.midpot.app"
       }
     },
     "Docker": {
@@ -32,13 +32,13 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {}
     },
-    "DatingWeb": {
+    "Custom": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://192.168.1.29:5000;https://192.168.1.29:5001",
+      "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "91.151.88.103"
+        "CHAT": "api.midpot.app"
       }
     }
   }
