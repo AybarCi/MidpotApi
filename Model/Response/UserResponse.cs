@@ -10,5 +10,6 @@ namespace DatingWeb.Model.Response
         public bool PreferredGender { get; set; }
         public DateTime BirthDate { get; set; }
         public string PersonName { get; set; }
+        public bool GhostMode { get; set; }
     }
 }

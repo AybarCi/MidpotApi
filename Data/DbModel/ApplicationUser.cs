@@ -29,5 +29,6 @@ namespace DatingWeb.Data.DbModel
         public string Job { get; set; }
         public bool IsDelete { get; set; } = false;
         public DateTime CreateDate { get; set; }
+        public bool GhostMode { get; set; }
     }
 }

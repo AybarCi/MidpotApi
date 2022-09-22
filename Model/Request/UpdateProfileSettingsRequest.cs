@@ -8,5 +8,6 @@
         public string School { get; set; }
         public string Job { get; set; }
         public string DeviceToken { get; set; }
+        public bool GhostMode { get; set; }
     }
 }

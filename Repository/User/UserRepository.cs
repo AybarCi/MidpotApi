@@ -40,7 +40,8 @@ namespace DatingWeb.Repository.User
                 PersonName = x.PersonName,
                 PreferredGender = x.PreferredGender,
                 UserId = x.Id,
-                Email = x.Email
+                Email = x.Email,
+                GhostMode = x.GhostMode
             }).FirstOrDefaultAsync();
         }
 
@@ -49,7 +50,7 @@ namespace DatingWeb.Repository.User
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateProfileSettings(long userId, string description, int fromAge, int untilAge, string school, string job, string deviceToken)
+        public async Task<bool> UpdateProfileSettings(long userId, string description, int fromAge, int untilAge, string school, string job, string deviceToken, bool ghostMode)
         {
             var user = await _context.ApplicationUsers.Where(u => u.Id == userId && u.LockoutEnabled == false).FirstOrDefaultAsync();
             user.Description = description;
@@ -58,6 +59,7 @@ namespace DatingWeb.Repository.User
             user.School = school;
             user.Job = job;
             user.DeviceToken = deviceToken;
+            user.GhostMode = ghostMode;
             int val = await _context.SaveChangesAsync();
 
             if (!string.IsNullOrEmpty(deviceToken))
