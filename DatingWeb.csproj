@@ -39,11 +39,15 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Settings\" />
+    <Folder Include="Repository\Story\" />
+    <Folder Include="Repository\Story\Interface\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Microsoft.AspNetCore.WebSockets" />
     <None Remove="Microsoft.AspNetCore.SignalR.Core" />
     <None Remove="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" />
     <None Remove="Microsoft.AspNetCore.SignalR" />
+    <None Remove="Repository\Story\" />
+    <None Remove="Repository\Story\Interface\" />
   </ItemGroup>
 </Project>

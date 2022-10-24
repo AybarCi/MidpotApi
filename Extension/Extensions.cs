@@ -37,5 +37,24 @@ namespace DatingWeb.Extension
         {
             return Constants.PhotoStorageId(input);
         }
+        /// <summary>
+        /// create story photo link
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ToStoryPhoto(this string input)
+        {
+            return Constants.StoryStorage(input);
+        }
+
+        /// <summary>
+        /// profile story link convert to profile photo guid
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static string ToStoryPhotoId(this string input)
+        {
+            return Constants.StoryStorageId(input);
+        }
     }
 }

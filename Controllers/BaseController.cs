@@ -11,5 +11,6 @@ namespace DatingWeb.Controllers
         protected DateTime GetBirthDate => (DateTime.Parse(User.FindFirst("Birthdate")?.Value));
         protected bool GetGender => (bool.Parse(User.FindFirst("Gender")?.Value));
         protected bool GetPreferredGender => (bool.Parse(User.FindFirst("PreferredGender")?.Value));
+        protected string GetProfilePhoto => (User.FindFirst("ProfilePhoto")?.Value);
     }
 }

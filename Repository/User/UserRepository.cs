@@ -1,5 +1,6 @@
 ﻿using DatingWeb.CacheService.Interface;
 using DatingWeb.Data;
+using DatingWeb.Data.DbModel;
 using DatingWeb.Extension;
 using DatingWeb.Helper;
 using DatingWeb.Model.Response;
@@ -50,7 +51,7 @@ namespace DatingWeb.Repository.User
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateProfileSettings(long userId, string description, int fromAge, int untilAge, string school, string job, string deviceToken, bool ghostMode)
+        public async Task<bool> UpdateProfileSettings(long userId, string description, int fromAge, int untilAge, string school, string job, string deviceToken, bool ghostMode, string personName)
         {
             var user = await _context.ApplicationUsers.Where(u => u.Id == userId && u.LockoutEnabled == false).FirstOrDefaultAsync();
             user.Description = description;
@@ -60,6 +61,7 @@ namespace DatingWeb.Repository.User
             user.Job = job;
             user.DeviceToken = deviceToken;
             user.GhostMode = ghostMode;
+            user.PersonName = personName;
             int val = await _context.SaveChangesAsync();
 
             if (!string.IsNullOrEmpty(deviceToken))

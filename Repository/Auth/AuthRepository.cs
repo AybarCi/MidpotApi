@@ -322,6 +322,7 @@ namespace DatingWeb.Repository.Auth
                         new Claim("BirthDate", user.BirthDate.ToString()),
                         new Claim("Gender", user.Gender.ToString()),
                         new Claim("PreferredGender", user.PreferredGender.ToString()),
+                        new Claim("ProfilePhoto", user.ProfilePhoto.ToString())
                     };
                     return claims.ToArray();
                 }

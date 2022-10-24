@@ -32,6 +32,7 @@ namespace DatingWeb.Data
             modelBuilder.Entity<PremiumUser>().ToTable("PremiumUser", "post");
             modelBuilder.Entity<Setting>().ToTable("Setting", "post");
             modelBuilder.Entity<Report>().ToTable("Report", "post");
+            modelBuilder.Entity<Story>().ToTable("Story","post");
         }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Gallery> Gallery { get; set; }
@@ -40,5 +41,6 @@ namespace DatingWeb.Data
         public DbSet<PremiumUser> PremiumUser { get; set; }
         public DbSet<Setting> Setting { get; set; }
         public DbSet<Report> Report { get; set; }
+        public DbSet<Story> Story { get; set; }
     }
 }

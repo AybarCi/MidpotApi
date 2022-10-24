@@ -42,7 +42,7 @@ namespace DatingWeb.Controllers
         [HttpPost("update-profile-settings")]
         public async Task<IActionResult> UpdateProfileSettings(UpdateProfileSettingsRequest model)
         {
-            return Ok(await _userRepository.UpdateProfileSettings(this.GetUserId, model.Description, model.FromAge, model.UntilAge, model.School, model.Job, model.DeviceToken, model.GhostMode));
+            return Ok(await _userRepository.UpdateProfileSettings(this.GetUserId, model.Description, model.FromAge, model.UntilAge, model.School, model.Job, model.DeviceToken, model.GhostMode, model.PersonName));
         }
 
         [HttpPost("update-profile-photo"), RequestSizeLimit(100000)]

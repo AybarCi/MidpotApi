@@ -40,6 +40,8 @@ using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using System.Net;
 using System.Threading.Tasks;
+using DatingWeb.Repository.Story;
+using DatingWeb.Repository.Story.Interface;
 
 namespace DatingWeb
 {
@@ -68,7 +70,7 @@ namespace DatingWeb
                 {
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost:5000")
+                        .WithOrigins("http://localhost:3000")
                         .AllowCredentials();
                 });
             });
@@ -152,6 +154,7 @@ namespace DatingWeb
             services.AddScoped<ISettingRepository, SettingRepository>();
             services.AddScoped<IPremiumUserRepository, PremiumUserRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
+            services.AddScoped<IStoryRepository, StoryRepository>(); 
 
             services.AddSwaggerGen(c =>
             {

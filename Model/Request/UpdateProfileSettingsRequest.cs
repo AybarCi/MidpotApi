@@ -9,5 +9,6 @@
         public string Job { get; set; }
         public string DeviceToken { get; set; }
         public bool GhostMode { get; set; }
+        public string PersonName { get; set; }
     }
 }
