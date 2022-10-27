@@ -45,7 +45,7 @@ namespace DatingWeb.Controllers
             return Ok(await _userRepository.UpdateProfileSettings(this.GetUserId, model.Description, model.FromAge, model.UntilAge, model.School, model.Job, model.DeviceToken, model.GhostMode, model.PersonName));
         }
 
-        [HttpPost("update-profile-photo"), RequestSizeLimit(100000)]
+        [HttpPost("update-profile-photo"), RequestSizeLimit(300000)]
         public async Task<ActionResult> UpdateProfilePhoto([FromForm] IFormFile file)
         {
             if (file.ContentType != "image/jpeg")

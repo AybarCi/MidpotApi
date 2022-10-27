@@ -23,7 +23,7 @@ namespace DatingWeb.Controllers
         {
             _storyRepository = storyRepository;
         }
-        [HttpPost("add-story-photo"), RequestSizeLimit(200000)]
+        [HttpPost("add-story-photo"), RequestSizeLimit(500000)]
         public async Task<ActionResult> AddStoryPhoto([FromForm] IFormFile file)
         {
             if (file.ContentType != "image/jpeg")
