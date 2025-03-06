@@ -41,6 +41,10 @@
     <Folder Include="Settings\" />
     <Folder Include="Repository\Story\" />
     <Folder Include="Repository\Story\Interface\" />
+    <Folder Include="Repository\Location\" />
+    <Folder Include="Repository\Location\Interface\" />
+    <Folder Include="Repository\Privacy\" />
+    <Folder Include="Repository\Privacy\Interface\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Microsoft.AspNetCore.WebSockets" />
@@ -49,5 +53,9 @@
     <None Remove="Microsoft.AspNetCore.SignalR" />
     <None Remove="Repository\Story\" />
     <None Remove="Repository\Story\Interface\" />
+    <None Remove="Repository\Location\" />
+    <None Remove="Repository\Location\Interface\" />
+    <None Remove="Repository\Privacy\" />
+    <None Remove="Repository\Privacy\Interface\" />
   </ItemGroup>
 </Project>

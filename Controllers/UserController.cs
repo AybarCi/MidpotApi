@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DatingWeb.Controllers
@@ -67,6 +68,41 @@ namespace DatingWeb.Controllers
         public async Task<ActionResult> DeleteUser()
         {
             return Ok(await _userRepository.DeleteUser(this.GetUserId));
+        }
+        [HttpGet("get-all-users")]
+        public async Task<IActionResult> GetAll()
+        {
+            return Ok(await _userRepository.GetAll());
+        }
+        [HttpGet("get-all-users-count")]
+        public async Task<IActionResult> GetAllUsersCount()
+        {
+            return Ok(await _userRepository.GetAllUsersCount());
+        }
+        [HttpGet("get-all-users-weekly")]
+        public async Task<IActionResult> GetUsersWeekly()
+        {
+            return Ok(await _userRepository.GetUsersWeekly());
+        }
+        [HttpGet("get-users-weekly-count")]
+        public async Task<IActionResult> GetUsersWeeklyCount()
+        {
+            return Ok(await _userRepository.GetUsersWeeklyCount());
+        }
+        [HttpGet("get-deleted-users")]
+        public async Task<IActionResult> GetDeletedUsers()
+        {
+            return Ok(await _userRepository.GetDeletedUsers());
+        }
+        [HttpGet("get-deleted-users-count")]
+        public async Task<IActionResult> GetDeletedUsersCount()
+        {
+            return Ok(await _userRepository.GetDeletedUsersCount());
+        }
+        [HttpPost("add-user")]
+        public async Task<IActionResult> AddUser([FromBody]List<AddUserRequest> request)
+        {
+            return Ok(await _userRepository.AddUser(request));
         }
     }
 }

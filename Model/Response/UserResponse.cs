@@ -11,5 +11,7 @@ namespace DatingWeb.Model.Response
         public DateTime BirthDate { get; set; }
         public string PersonName { get; set; }
         public bool GhostMode { get; set; }
+        public string ProfilePhoto { get; set; }
+        public bool IsDelete { get; set; }
     }
 }

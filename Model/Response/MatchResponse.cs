@@ -13,5 +13,6 @@ namespace DatingWeb.Model.Response
         public string School { get; set; }
         public string Job { get; set; }
         public DateTime CreateDate { get; set; }
+        public string DeviceToken { get; set; }
     }
 }

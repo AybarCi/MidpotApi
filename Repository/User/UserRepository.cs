@@ -3,13 +3,17 @@ using DatingWeb.Data;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Extension;
 using DatingWeb.Helper;
+using DatingWeb.Model.Request;
 using DatingWeb.Model.Response;
 using DatingWeb.Repository.User.Interface;
 using DatingWeb.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace DatingWeb.Repository.User
@@ -151,6 +155,97 @@ namespace DatingWeb.Repository.User
             }
             else
                 throw new ApiException("Kullanıcı bulunamadı!");
+        }
+
+        public async Task<List<UserResponse>> GetAll()
+        {
+            return await _context.ApplicationUsers.OrderBy(x => x.CreateDate).Select(x => new UserResponse
+            {
+                BirthDate = x.BirthDate,
+                Gender = x.Gender,
+                PersonName = x.PersonName,
+                PreferredGender = x.PreferredGender,
+                UserId = x.Id,
+                Email = x.Email,
+                GhostMode = x.GhostMode,
+                ProfilePhoto = x.ProfilePhoto,
+                IsDelete = x.IsDelete
+            }).ToListAsync();
+        }
+
+        public async Task<List<UserResponse>> GetUsersWeekly()
+        {
+            return await _context.ApplicationUsers.Where(x => x.CreateDate > DateTime.Now.AddDays(-7))
+                .OrderBy(x => x.CreateDate)
+                .Select(x => new UserResponse
+            {
+                BirthDate = x.BirthDate,
+                Gender = x.Gender,
+                PersonName = x.PersonName,
+                PreferredGender = x.PreferredGender,
+                UserId = x.Id,
+                Email = x.Email,
+                GhostMode = x.GhostMode
+            }).ToListAsync();
+        }
+
+        public async Task<int> GetAllUsersCount()
+        {
+            return await _context.ApplicationUsers.CountAsync();
+        }
+
+        public async Task<int> GetUsersWeeklyCount()
+        {
+            return await _context.ApplicationUsers.Where(x => x.CreateDate > DateTime.Now.AddDays(-7)).CountAsync();
+        }
+        public async Task<List<UserResponse>> GetDeletedUsers()
+        {
+            return await _context.ApplicationUsers.Where(x => x.IsDelete == true).Select(x => new UserResponse
+            {
+                BirthDate = x.BirthDate,
+                Gender = x.Gender,
+                PersonName = x.PersonName,
+                PreferredGender = x.PreferredGender,
+                UserId = x.Id,
+                Email = x.Email,
+                GhostMode = x.GhostMode
+            }).ToListAsync();
+        }
+        public async Task<int> GetDeletedUsersCount()
+        {
+            return await _context.ApplicationUsers.Where(x => x.IsDelete == true).CountAsync();
+        }
+        public async Task<bool> AddUser(List<AddUserRequest> addUserRequest)
+        {
+            List<ApplicationUser> applicationUsers = new List<ApplicationUser>();
+            foreach (var item in addUserRequest)
+            {
+                applicationUsers.Add(new ApplicationUser
+                {
+                    PersonName = item.PersonName,
+                    BirthDate = item.BirthDate,
+                    CreateDate = DateTime.Now,
+                    EmailConfirmed = true,
+                    FromAge = item.FromAge,
+                    Gender = item.Gender,
+                    Latitude = item.Latitude,
+                    LockoutEnabled = false,
+                    Longitude = item.Longitude,
+                    NormalizedUserName = item.PersonName,
+                    PreferredGender = item.PreferredGender,
+                    UntilAge = item.UntilAge,
+                    UserName = item.PersonName,
+                    IsDelete = false,
+                    PhoneNumber = "0506-938-44-13",
+                    PhoneNumberConfirmed = true,
+                    Platform = true,
+                    ProfilePhoto = "https://midpotstorage.blob.core.windows.net/firstcontainer/481245f0-ce3c-4caf-8855-8258c808c420.jpeg"
+                });
+            }
+
+            await _context.AddRangeAsync(applicationUsers);
+            var val = await _context.SaveChangesAsync();
+            return val > 0 ? true : false;
         }
     }
 }

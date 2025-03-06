@@ -42,6 +42,10 @@ using System.Net;
 using System.Threading.Tasks;
 using DatingWeb.Repository.Story;
 using DatingWeb.Repository.Story.Interface;
+using DatingWeb.Repository.Location.Interface;
+using DatingWeb.Repository.Location;
+using DatingWeb.Repository.Privacy.Interface;
+using DatingWeb.Repository.Privacy;
 
 namespace DatingWeb
 {
@@ -70,7 +74,7 @@ namespace DatingWeb
                 {
                     policy.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost:3000")
+                        .WithOrigins("http://localhost:3000", "http://localhost:3001")
                         .AllowCredentials();
                 });
             });
@@ -154,7 +158,9 @@ namespace DatingWeb
             services.AddScoped<ISettingRepository, SettingRepository>();
             services.AddScoped<IPremiumUserRepository, PremiumUserRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
-            services.AddScoped<IStoryRepository, StoryRepository>(); 
+            services.AddScoped<IStoryRepository, StoryRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IPrivacyRepository, PrivacyRepository>();
 
             services.AddSwaggerGen(c =>
             {

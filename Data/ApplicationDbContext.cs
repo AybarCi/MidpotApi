@@ -25,6 +25,7 @@ namespace DatingWeb.Data
             modelBuilder.Entity<IdentityRole<long>>().ToTable("AspNetRoles", "identity");
             modelBuilder.Entity<IdentityRoleClaim<long>>().ToTable("AspNetRoleClaims", "identity");
             modelBuilder.Entity<IdentityUserRole<long>>().ToTable("AspNetUserRoles", "identity").HasKey(x => x.RoleId);
+            modelBuilder.Entity<Location>().ToTable("Locations", "identity").HasKey(x => x.Id);
 
             modelBuilder.Entity<Gallery>().ToTable("Gallery", "post");
             modelBuilder.Entity<Match>().ToTable("Match", "post");
@@ -33,6 +34,7 @@ namespace DatingWeb.Data
             modelBuilder.Entity<Setting>().ToTable("Setting", "post");
             modelBuilder.Entity<Report>().ToTable("Report", "post");
             modelBuilder.Entity<Story>().ToTable("Story","post");
+            modelBuilder.Entity<Privacy>().ToTable("Privacy", "post");
         }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Gallery> Gallery { get; set; }
@@ -42,5 +44,7 @@ namespace DatingWeb.Data
         public DbSet<Setting> Setting { get; set; }
         public DbSet<Report> Report { get; set; }
         public DbSet<Story> Story { get; set; }
+        public DbSet<Location> Location { get; set; }
+        public DbSet<Privacy> Privacy { get; set; }
     }
 }

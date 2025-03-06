@@ -23,7 +23,16 @@ namespace DatingWeb.Controllers
         {
             return Ok(await _premiumUserRepository.GetPremiumUser(this.GetUserId));
         }
-
+        [HttpGet("get-premium-users")]
+        public async Task<IActionResult> GetPremiumUsers()
+        {
+            return Ok(await _premiumUserRepository.GetPremiumUsers());
+        }
+        [HttpGet("get-premium-users-count")]
+        public async Task<IActionResult> GetPremiumUsersCount()
+        {
+            return Ok(await _premiumUserRepository.GetPremiumUsersCount());
+        }
         [HttpPost("register-premium-user")]
         public async Task<IActionResult> RegisterPremiumUser([FromBody] RegisterPremiumUserRequest model)
         {

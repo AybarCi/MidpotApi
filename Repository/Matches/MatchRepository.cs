@@ -66,7 +66,8 @@ namespace DatingWeb.Repository.Matches
                     ProfilePhoto = x.ProfilePhoto,
                     Description = x.Description,
                     School = x.School,
-                    Job = x.Job
+                    Job = x.Job,
+                    DeviceToken = x.DeviceToken
                 }).ToListAsync();
 
                 for (int i = 0; i < returnedUser.Count; i++)
@@ -182,7 +183,8 @@ namespace DatingWeb.Repository.Matches
                                 ProfilePhoto = reader[3].ToString(),
                                 Description = reader[4].ToString(),
                                 School = reader[5].ToString(),
-                                Job = reader[6].ToString()
+                                Job = reader[6].ToString(),
+                                DeviceToken = reader[7].ToString()
                             };
                         }
                     };
@@ -207,7 +209,8 @@ namespace DatingWeb.Repository.Matches
                                 ProfilePhoto = reader[3].ToString(),
                                 Description = reader[4].ToString(),
                                 School = reader[5].ToString(),
-                                Job = reader[6].ToString()
+                                Job = reader[6].ToString(),
+                                DeviceToken = reader[7].ToString()
                             };
                         }
                     };
@@ -232,7 +235,8 @@ namespace DatingWeb.Repository.Matches
                                 ProfilePhoto = reader[3].ToString(),
                                 Description = reader[4].ToString(),
                                 School = reader[5].ToString(),
-                                Job = reader[6].ToString()
+                                Job = reader[6].ToString(),
+                                DeviceToken = reader[7].ToString()
                             };
                         }
                     };
