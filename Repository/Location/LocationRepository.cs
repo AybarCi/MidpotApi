@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,7 +45,7 @@ namespace DatingWeb.Repository.Location
                     }
                 ).FirstOrDefaultAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new LocationResponse();
             }
@@ -64,7 +64,7 @@ namespace DatingWeb.Repository.Location
                     Longitude = x.Longitude
                 }).ToListAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new List<LocationResponse>();
             }

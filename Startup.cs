@@ -26,6 +26,7 @@ using DatingWeb.SignalrHelper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Identity;
@@ -33,6 +34,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
@@ -209,9 +211,7 @@ namespace DatingWeb
             services.AddControllers();
 
             // Add Health Checks
-            services.AddHealthChecks()
-                .AddDbContextCheck<ApplicationDbContext>("database")
-                .AddRedis(redisSettings.ConnectionString, "redis");
+            services.AddHealthChecks();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

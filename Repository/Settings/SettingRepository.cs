@@ -1,4 +1,4 @@
-﻿using DatingWeb.CacheService.Interface;
+using DatingWeb.CacheService.Interface;
 using DatingWeb.Data;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Model.Response;
@@ -87,7 +87,7 @@ namespace DatingWeb.Repository.Settings
 
         public async Task<string> UnlockPhone(string phoneNumber)
         {
-            return phoneNumber.Decrypt(_configuration);
+            return await Task.FromResult(phoneNumber.Decrypt(_configuration));
         }
     }
 }
