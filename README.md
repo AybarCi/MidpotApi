@@ -4,6 +4,12 @@
 [![CodeQL Security Analysis](https://github.com/AybarCi/MidpotApi/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/AybarCi/MidpotApi/actions/workflows/codeql-analysis.yml)
 [![Dependency Review](https://github.com/AybarCi/MidpotApi/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/AybarCi/MidpotApi/actions/workflows/dependency-review.yml)
 
+**Last Updated**: January 2025
+
+## Overview
+
+MidpotApi is a comprehensive dating application backend built with .NET 7.0, featuring real-time chat, location-based matching, Redis caching, and PostgreSQL database. Now with enhanced security through automated CodeQL analysis.
+
 ## Overview
 
 MidpotApi is a comprehensive dating application backend built with .NET 7.0, featuring real-time chat, location-based matching, Redis caching, and PostgreSQL database.
