@@ -1,0 +1,225 @@
+# Midpot API Production Stack for Portainer
+# Deploy this stack in Portainer for production environment
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database with High Availability Configuration
+  postgres:
+    image: postgres:15-alpine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      labels:
+        - "traefik.enable=false"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-socialdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Database password is required}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Database:/docker-entrypoint-initdb.d:ro
+      - ./backups:/backups
+    networks:
+      - midpot-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-socialdb}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis Cache with Persistence
+  redis:
+    image: redis:7-alpine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --tcp-keepalive 300
+      --timeout 0
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - midpot-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Midpot API Application with Load Balancing
+  midpot-api:
+    image: ${DOCKER_REGISTRY:-your-registry}/midpot-api:${API_VERSION:-latest}
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.midpot-api.rule=Host(`${API_DOMAIN:-api.midpot.net}`)"
+        - "traefik.http.routers.midpot-api.entrypoints=websecure"
+        - "traefik.http.routers.midpot-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.midpot-api.loadbalancer.server.port=80"
+        - "traefik.http.services.midpot-api.loadbalancer.healthcheck.path=/health"
+        - "traefik.http.services.midpot-api.loadbalancer.healthcheck.interval=30s"
+        - "traefik.http.services.midpot-api.loadbalancer.healthcheck.timeout=10s"
+    environment:
+      # ASP.NET Core Configuration
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:80
+      
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-socialdb}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ConnectionStrings__PostgreConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-socialdb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD};Pooling=true;MinPoolSize=10;MaxPoolSize=100;ConnectionLifetime=0;CommandTimeout=30;
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      Redis__ConnectionString: redis:6379,abortConnect=false,connectTimeout=5000,ssl=false
+      
+      # JWT Configuration
+      Tokens__Key: ${JWT_KEY:?JWT Key is required}
+      Tokens__Issuer: ${JWT_ISSUER:-https://www.midpot.net}
+      Tokens__Audience: ${JWT_AUDIENCE:-https://www.midpot.net}
+      Tokens__Lifetime: ${JWT_LIFETIME:-48}
+      Tokens__RefreshTokenLifetime: ${JWT_REFRESH_LIFETIME:-360}
+      
+      # Azure Blob Storage
+      AzureBlobStorage: ${AZURE_BLOB_STORAGE}
+      
+      # FCM Configuration
+      FCM__SenderId: ${FCM_SENDER_ID}
+      FCM__ServerKey: ${FCM_SERVER_KEY}
+      
+      # SMS Configuration
+      SMS__SmsServiceUrl: ${SMS_SERVICE_URL}
+      SMS__UserId: ${SMS_USER_ID}
+      SMS__Password: ${SMS_PASSWORD}
+      SMS__Sender: ${SMS_SENDER}
+      
+      # Security
+      Security__Key: ${SECURITY_KEY}
+      DistanceLimit: ${DISTANCE_LIMIT:-100}
+      
+      # Redis Settings
+      Redis__DefaultExpiryMinutes: ${REDIS_DEFAULT_EXPIRY:-60}
+      Redis__UserProfileExpiryMinutes: ${REDIS_USER_PROFILE_EXPIRY:-120}
+      Redis__MatchResultsExpiryMinutes: ${REDIS_MATCH_EXPIRY:-30}
+      Redis__LocationDataExpiryMinutes: ${REDIS_LOCATION_EXPIRY:-15}
+      
+    networks:
+      - midpot-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Database Backup Service
+  postgres-backup:
+    image: postgres:15-alpine
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 24h
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-socialdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_SCHEDULE: "0 2 * * *"  # Daily at 2 AM
+      BACKUP_RETENTION: "7"  # Keep 7 days of backups
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    command: |
+      sh -c '
+      echo "0 2 * * * /backup.sh" | crontab - &&
+      crond -f
+      '
+    networks:
+      - midpot-network
+    depends_on:
+      - postgres
+
+networks:
+  midpot-network:
+    driver: overlay
+    attachable: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

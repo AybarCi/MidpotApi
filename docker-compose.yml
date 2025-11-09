@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: midpot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-socialdb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Database:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - midpot-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-socialdb}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: midpot-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - midpot-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Midpot API Application
+  midpot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    container_name: midpot-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # ASP.NET Core Environment
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:80
+      
+      # Database Configuration
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-socialdb}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      ConnectionStrings__PostgreConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-socialdb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres};Pooling=true;MinPoolSize=5;MaxPoolSize=100;ConnectionLifetime=0;CommandTimeout=30;
+      
+      # Redis Configuration
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      Redis__ConnectionString: redis:6379
+      
+      # JWT Configuration
+      Tokens__Key: ${JWT_KEY:-s5u8x/A?D(G+KbPeShVmYq3t6w9y$B&E)H@McQfTjWnZr4u7x!A%C*F-JaNdRgUkXp2s5v8y/B?E(G+KbPeShVmYq3t6w9z$C&F)J@McQfTjWnZr4u7x!A%D*G-KaPdRgUkXp2s5v8y/B?E(H+MbQeThVmYq3t6w9z$C&F)J@NcRfUjXnZr4u7x!A%D*G-KaPdSgVkYp3s5v8y/B?E(H+MbQeThWmZq4t7w9z$C&F)J@NcRfUjXn2r5u8x/A%D*G}
+      Tokens__Issuer: ${JWT_ISSUER:-https://www.midpot.net}
+      Tokens__Audience: ${JWT_AUDIENCE:-https://www.midpot.net}
+      Tokens__Lifetime: ${JWT_LIFETIME:-48}
+      Tokens__RefreshTokenLifetime: ${JWT_REFRESH_LIFETIME:-360}
+      
+      # Azure Blob Storage
+      AzureBlobStorage: ${AZURE_BLOB_STORAGE:-DefaultEndpointsProtocol=https;AccountName=midpotstorage;AccountKey=lOc4kq2GOSBG5Yd9tgtiB5Kvrzz5tVROBjiAZ9fr1GT2qcbTO9cy+K/toW1y4csZSysXcfDOUJThXY4yQV3Tsw==;EndpointSuffix=core.windows.net}
+      
+      # FCM Configuration
+      FCM__SenderId: ${FCM_SENDER_ID:-904219255660}
+      FCM__ServerKey: ${FCM_SERVER_KEY:-AAAA0oeq42w:APA91bH8fcX-T6dz2CACYyW37vn26UcGnFc6f9vbEy5BSyHgf5Lcb9bmpfNIvoDWtENIlMfVv50RkLPvPRhxA86W5Fv6Nb4OqikGd-CqNZ76d9uOJOfWO-_UsYKKzFov4s9hUxRHhseQ}
+      
+      # SMS Configuration
+      SMS__SmsServiceUrl: ${SMS_SERVICE_URL:-https://api.vatansms.net/api/v1/1toN}
+      SMS__UserId: ${SMS_USER_ID:-e922a5b11aae40dd84928621}
+      SMS__Password: ${SMS_PASSWORD:-bcc4701b87c2490ea4bf1a80}
+      SMS__Sender: ${SMS_SENDER:-Cihan Aybar}
+      
+      # Security
+      Security__Key: ${SECURITY_KEY:-XF1ZV9uYW1lIjoiMDZhMDE3NGYtMjYzZC00YmE2LTg4YjAtNDMyODJkMzRmZDQ5IiwianRpIjoiZGI5NzAzOTEtM2VhMytOWY4MGI0NmQ3Nz}
+      DistanceLimit: ${DISTANCE_LIMIT:-100}
+      
+      # Redis Settings
+      Redis__DefaultExpiryMinutes: ${REDIS_DEFAULT_EXPIRY:-60}
+      Redis__UserProfileExpiryMinutes: ${REDIS_USER_PROFILE_EXPIRY:-120}
+      Redis__MatchResultsExpiryMinutes: ${REDIS_MATCH_EXPIRY:-30}
+      Redis__LocationDataExpiryMinutes: ${REDIS_LOCATION_EXPIRY:-15}
+      
+    ports:
+      - "5000:80"
+    networks:
+      - midpot-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: midpot-nginx
+    restart: unless-stopped
+    depends_on:
+      - midpot-api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - midpot-network
+    profiles:
+      - with-proxy
+
+networks:
+  midpot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

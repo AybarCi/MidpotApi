@@ -207,6 +207,11 @@ namespace DatingWeb
             });
 
             services.AddControllers();
+
+            // Add Health Checks
+            services.AddHealthChecks()
+                .AddDbContextCheck<ApplicationDbContext>("database")
+                .AddRedis(redisSettings.ConnectionString, "redis");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -243,6 +248,9 @@ namespace DatingWeb
                 {
                     options.Transports = HttpTransportType.WebSockets;
                 });
+                
+                // Health Check Endpoint
+                endpoints.MapHealthChecks("/health").RequireHost("*:*");
             });
             
 
