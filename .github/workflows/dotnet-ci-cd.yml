@@ -131,13 +131,13 @@ jobs:
       run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
 
     - name: Run code analysis
-      run: dotnet format --verify-no-changes --verbosity diagnostic
+      run: dotnet format DatingWeb.csproj --verify-no-changes --verbosity diagnostic
 
     - name: Run dotnet format check
       run: |
-        dotnet format --verify-no-changes
+        dotnet format DatingWeb.csproj --verify-no-changes
         if [ $? -ne 0 ]; then
-          echo "Code formatting issues found. Run 'dotnet format' to fix them."
+          echo "Code formatting issues found. Run 'dotnet format DatingWeb.csproj' to fix them."
           exit 1
         fi
 
