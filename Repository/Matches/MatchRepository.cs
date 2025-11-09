@@ -1,4 +1,4 @@
-﻿using DatingWeb.CacheService.Interface;
+using DatingWeb.CacheService.Interface;
 using DatingWeb.Data;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Extension;
@@ -25,15 +25,17 @@ namespace DatingWeb.Repository.Matches
         private readonly IConfiguration _configuration;
         private readonly INotificationService _notificationService;
         private readonly IUserRepository _userRepository;
+        private readonly IRedisCache _redisCache;
 
         public MatchRepository(ApplicationDbContext context, ICache cache, IConfiguration configuration,
-            INotificationService notificationService, IUserRepository userRepository)
+            INotificationService notificationService, IUserRepository userRepository, IRedisCache redisCache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(_context));
             _cache = cache;
             _configuration = configuration;
             _notificationService = notificationService;
             _userRepository = userRepository;
+            _redisCache = redisCache;
         }
 
         /// <summary>
@@ -43,6 +45,15 @@ namespace DatingWeb.Repository.Matches
         /// <returns></returns>
         public async Task<List<MatchResponse>> MatchMachine(long userId, bool gender, bool preferredGender, DateTime lastMatchDate, double latitude, double longitude)
         {
+            string cacheKey = $"user_matches_{userId}_{gender}_{preferredGender}";
+            
+            // Redis cache'ten kontrol et
+            var cachedMatches = await _redisCache.GetAsync<List<MatchResponse>>(cacheKey);
+            if (cachedMatches != null)
+            {
+                return cachedMatches;
+            }
+            
             var returnedUser = new List<MatchResponse>();
 
             //Aktif match var mı
@@ -130,6 +141,9 @@ namespace DatingWeb.Repository.Matches
                     });
                 }
             }
+
+            // Redis cache'e kaydet
+            await _redisCache.SetAsync(cacheKey, returnedUser, TimeSpan.FromMinutes(15)); // 15 dakika cache
 
             return returnedUser;
         }
@@ -261,6 +275,11 @@ namespace DatingWeb.Repository.Matches
             await _context.SaveChangesAsync();
 
             _cache.Set(match.MatchId.ToString(), matchId);
+            
+            // Redis cache'ini temizle - hem match cache'i hem de user profile cache'i
+            string matchCacheKey = $"user_matches_{userId}_";
+            await _redisCache.RemovePatternAsync(matchCacheKey); // Tüm match pattern'larını temizle
+            
             return true;
         }
         public async Task SendNotification(string matchId, long to)

@@ -23,7 +23,7 @@
       "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "api.midpot.app"
+        "CHAT": "api.midpot.net"
       }
     },
     "Docker": {
@@ -38,7 +38,7 @@
       "applicationUrl": "http://localhost:5000;https://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "CHAT": "api.midpot.app"
+        "CHAT": "api.midpot.net"
       }
     }
   }

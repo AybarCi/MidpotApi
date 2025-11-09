@@ -1,4 +1,4 @@
-﻿using DatingWeb.CacheService.Interface;
+using DatingWeb.CacheService.Interface;
 using DatingWeb.Data;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Extension;
@@ -23,12 +23,14 @@ namespace DatingWeb.Repository.User
         private readonly ApplicationDbContext _context;
         private readonly IBlobService _blobService;
         private readonly ICache _cache;
+        private readonly IRedisCache _redisCache;
 
-        public UserRepository(ApplicationDbContext context, IBlobService blobService, ICache cache)
+        public UserRepository(ApplicationDbContext context, IBlobService blobService, ICache cache, IRedisCache redisCache)
         {
             _context = context ?? throw new ArgumentNullException(nameof(_context));
             _blobService = blobService;
             _cache = cache;
+            _redisCache = redisCache;
         }
 
         /// <summary>
@@ -38,7 +40,17 @@ namespace DatingWeb.Repository.User
         /// <returns></returns>
         public async Task<UserResponse> GetProfile(long userId)
         {
-            return await _context.ApplicationUsers.Where(x => x.Id == userId && x.LockoutEnabled == false).Select(x => new UserResponse
+            string cacheKey = $"user_profile_{userId}";
+            
+            // Redis cache'ten kontrol et
+            var cachedProfile = await _redisCache.GetAsync<UserResponse>(cacheKey);
+            if (cachedProfile != null)
+            {
+                return cachedProfile;
+            }
+            
+            // Cache'te yoksa veritabanından getir
+            var profile = await _context.ApplicationUsers.Where(x => x.Id == userId && x.LockoutEnabled == false).Select(x => new UserResponse
             {
                 BirthDate = x.BirthDate,
                 Gender = x.Gender,
@@ -48,6 +60,14 @@ namespace DatingWeb.Repository.User
                 Email = x.Email,
                 GhostMode = x.GhostMode
             }).FirstOrDefaultAsync();
+            
+            // Veriyi Redis'e cache'le
+            if (profile != null)
+            {
+                await _redisCache.SetAsync(cacheKey, profile, TimeSpan.FromMinutes(30)); // 30 dakika cache
+            }
+            
+            return profile;
         }
 
         /// <summary>
@@ -70,6 +90,10 @@ namespace DatingWeb.Repository.User
 
             if (!string.IsNullOrEmpty(deviceToken))
                 _cache.Remove(userId.ToString());
+
+            // Redis cache'ini temizle
+            string cacheKey = $"user_profile_{userId}";
+            await _redisCache.RemoveAsync(cacheKey);
 
             return val > 0;
         }

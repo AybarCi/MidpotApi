@@ -1,8 +1,10 @@
-﻿using DatingWeb.Helper;
+using DatingWeb.CacheService.Interface;
+using DatingWeb.Helper;
 using DatingWeb.Model.Request;
 using DatingWeb.Repository.Auth.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -13,10 +15,12 @@ namespace DatingWeb.Controllers
     public class AuthController : BaseController
     {
         private readonly IAuthRepository _authRepository;
+        private readonly IRedisCache _redisCache;
 
-        public AuthController(IAuthRepository userRepository)
+        public AuthController(IAuthRepository userRepository, IRedisCache redisCache)
         {
             _authRepository = userRepository;
+            _redisCache = redisCache;
         }
 
         [HttpPost("register")]
@@ -58,7 +62,30 @@ namespace DatingWeb.Controllers
                 if (model.Password.Length < 6)
                     throw new ApiException("Şifre minimum 6 karakter olmalı!");
 
-                return Ok(await _authRepository.Login(model.PhoneNumber, model.Password, model.DeviceToken, model.Platform));
+                string cacheKey = $"login_attempt_{model.PhoneNumber}";
+                
+                // Rate limiting için cache kontrolü
+                var cachedAttempt = await _redisCache.GetAsync<int>(cacheKey);
+                if (cachedAttempt >= 5) // 5 denemeden fazla
+                {
+                    throw new ApiException("Çok fazla giriş denemesi. Lütfen 15 dakika sonra tekrar deneyin.");
+                }
+
+                try
+                {
+                    var result = await _authRepository.Login(model.PhoneNumber, model.Password, model.DeviceToken, model.Platform);
+                    
+                    // Başarılı girişte cache'i temizle
+                    await _redisCache.RemoveAsync(cacheKey);
+                    
+                    return Ok(result);
+                }
+                catch (ApiException)
+                {
+                    // Başarısız girişte cache'i artır
+                    await _redisCache.SetAsync(cacheKey, cachedAttempt + 1, TimeSpan.FromMinutes(15));
+                    throw;
+                }
             }
             else
                 throw new ApiException("Telefon veya şifre boş geçilemez!");

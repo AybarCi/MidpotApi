@@ -32,6 +32,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
@@ -66,6 +67,17 @@ namespace DatingWeb
 
  
             services.AddMemoryCache();
+            
+            // Redis Configuration
+            var redisSettings = Configuration.GetSection("Redis").Get<RedisSettings>();
+            services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
+            
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisSettings.ConnectionString;
+                options.InstanceName = "MidpotApp";
+            });
+            
             services.AddHttpClient();
 
             services.AddCors(options =>
@@ -155,6 +167,7 @@ namespace DatingWeb
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISmsService, SmsService>();
             services.AddScoped<ICache, Cache>();
+            services.AddScoped<IRedisCache, DatingWeb.CacheService.RedisCache>();
             services.AddScoped<ISettingRepository, SettingRepository>();
             services.AddScoped<IPremiumUserRepository, PremiumUserRepository>();
             services.AddScoped<IReportRepository, ReportRepository>();
@@ -207,7 +220,7 @@ namespace DatingWeb
                 options.SwaggerEndpoint(endpointUrl, "Project API");
             });
 
-            app.UseCors("CorsPolicy");
+            // app.UseCors("CorsPolicy"); // Tanımlı olmayan CORS policy çağrısını kaldır
             app.UseCors("ClientPermission");
 
             //app.UseHttpsRedirection();

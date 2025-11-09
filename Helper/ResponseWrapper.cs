@@ -1,4 +1,4 @@
-﻿using DatingWeb.Model.Response;
+using DatingWeb.Model.Response;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.IO;
@@ -19,6 +19,11 @@ namespace DatingWeb.Helper
             var currentBody = context.Response.Body;
             if (context.Request.Path == "/chat/negotiate")
             {
+                await this._next(context);
+            }
+            else if (context.Request.Path.StartsWithSegments("/swagger"))
+            {
+                // Swagger UI ve JSON endpoint'lerini sarmalama dışında bırak
                 await this._next(context);
             }
             //else if (context.Request.Path.StartsWithSegments("/chat", StringComparison.OrdinalIgnoreCase) && context.Request.Query.TryGetValue("access_token", out var accessToken))
