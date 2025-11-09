@@ -124,7 +124,7 @@ JWT_KEY=your_jwt_key
 
 # Optional (update as needed)
 API_DOMAIN=api.midpot.net
-DOCKER_REGISTRY=your-registry
+GITHUB_REPOSITORY=AybarCi/MidpotApi
 API_VERSION=latest
 ```
 

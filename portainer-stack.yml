@@ -91,7 +91,7 @@ services:
 
   # Midpot API Application with Load Balancing
   midpot-api:
-    image: ${DOCKER_REGISTRY:-your-registry}/midpot-api:${API_VERSION:-latest}
+    image: ghcr.io/${GITHUB_REPOSITORY:-AybarCi/MidpotApi}:${API_VERSION:-latest}
     deploy:
       replicas: 2
       update_config:

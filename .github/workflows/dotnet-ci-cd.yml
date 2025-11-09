@@ -154,17 +154,18 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Login to Docker Hub
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/midpot-api
+        images: ghcr.io/${{ github.repository }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -184,7 +185,7 @@ jobs:
     - name: Deploy to staging
       run: |
         echo "Docker staging image built and pushed successfully!"
-        echo "Image: ${{ secrets.DOCKERHUB_USERNAME }}/midpot-api:develop"
+        echo "Image: ghcr.io/${{ github.repository }}:develop"
         echo "Deploy to your staging environment"
 
   deploy-production:
@@ -200,17 +201,18 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Login to Docker Hub
+    - name: Login to GitHub Container Registry
       uses: docker/login-action@v3
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ secrets.DOCKERHUB_USERNAME }}/midpot-api
+        images: ghcr.io/${{ github.repository }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -231,7 +233,7 @@ jobs:
     - name: Deploy to production
       run: |
         echo "Docker image built and pushed successfully!"
-        echo "Image: ${{ secrets.DOCKERHUB_USERNAME }}/midpot-api:latest"
+        echo "Image: ghcr.io/${{ github.repository }}:latest"
         echo "Deploy to your production environment (Portainer, Kubernetes, etc.)"
         # Add your production deployment commands here
         # Example: Azure, AWS, Docker deployment etc.
