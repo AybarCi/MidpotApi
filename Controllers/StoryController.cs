@@ -30,7 +30,7 @@ namespace DatingWeb.Controllers
             //{
             //    return BadRequest();
             //}
-                
+
 
             if (file == null)
                 return BadRequest();
@@ -42,7 +42,7 @@ namespace DatingWeb.Controllers
         [HttpPost("get-stories")]
         public async Task<IActionResult> GetStories(List<GetStoriesRequest> request)
         {
-            var response = await _storyRepository.GetStories(this.GetUserId, this.GetPersonName, this.GetProfilePhoto,request);
+            var response = await _storyRepository.GetStories(this.GetUserId, this.GetPersonName, this.GetProfilePhoto, request);
 
             return Ok(response);
         }

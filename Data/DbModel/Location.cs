@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatingWeb.Data.DbModel
 {
-	public class Location
+    public class Location
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]

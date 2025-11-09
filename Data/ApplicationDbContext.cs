@@ -33,7 +33,7 @@ namespace DatingWeb.Data
             modelBuilder.Entity<PremiumUser>().ToTable("PremiumUser", "post");
             modelBuilder.Entity<Setting>().ToTable("Setting", "post");
             modelBuilder.Entity<Report>().ToTable("Report", "post");
-            modelBuilder.Entity<Story>().ToTable("Story","post");
+            modelBuilder.Entity<Story>().ToTable("Story", "post");
             modelBuilder.Entity<Privacy>().ToTable("Privacy", "post");
         }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }

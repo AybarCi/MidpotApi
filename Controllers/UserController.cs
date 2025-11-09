@@ -100,7 +100,7 @@ namespace DatingWeb.Controllers
             return Ok(await _userRepository.GetDeletedUsersCount());
         }
         [HttpPost("add-user")]
-        public async Task<IActionResult> AddUser([FromBody]List<AddUserRequest> request)
+        public async Task<IActionResult> AddUser([FromBody] List<AddUserRequest> request)
         {
             return Ok(await _userRepository.AddUser(request));
         }

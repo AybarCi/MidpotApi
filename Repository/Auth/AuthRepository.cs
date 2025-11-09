@@ -72,7 +72,7 @@ namespace DatingWeb.Repository.Auth
                     checkUser.IsDelete = false;
                     checkUser.ProfilePhoto = string.Format("{0}", Guid.NewGuid().ToString()).ToProfilePhoto();
                     checkUser.CreateDate = DateTime.UtcNow;
-                    
+
                     await _context.SaveChangesAsync();
 
                     await SendSms(phoneNumber, confirmCode);
@@ -107,7 +107,7 @@ namespace DatingWeb.Repository.Auth
                 IsDelete = false,
                 CreateDate = DateTime.UtcNow,
                 GhostMode = false
-        };
+            };
 
             var result = await _userManager.CreateAsync(user, password);
 

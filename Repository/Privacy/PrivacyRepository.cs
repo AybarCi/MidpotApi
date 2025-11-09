@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatingWeb.Repository.Privacy
 {
-	public class PrivacyRepository:IPrivacyRepository
-	{
+    public class PrivacyRepository : IPrivacyRepository
+    {
         private readonly ApplicationDbContext _context;
         public PrivacyRepository(ApplicationDbContext context)
-		{
+        {
             _context = context ?? throw new ArgumentNullException(nameof(_context));
         }
 

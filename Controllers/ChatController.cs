@@ -26,10 +26,10 @@ namespace DatingWeb.Controllers
         [HttpPost("get-new-messages")]
         public async Task<IActionResult> GetNewMessages()
         {
-            return Ok(await _chatRepository.GetNewMessages(this.GetUserId));     
+            return Ok(await _chatRepository.GetNewMessages(this.GetUserId));
         }
         [HttpPost("read-messages")]
-        public async Task<IActionResult> ReadMessages([FromBody]ReadMessagesRequest request)
+        public async Task<IActionResult> ReadMessages([FromBody] ReadMessagesRequest request)
         {
             return Ok(await _chatRepository.ReadMessages(request.MatchId, request.MatchedUserId));
         }

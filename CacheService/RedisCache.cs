@@ -148,7 +148,7 @@ namespace DatingWeb.CacheService
             // Redis'te pattern ile silme işlemi için özel implementasyon gerekli
             // Bu basit implementasyonda sadece exact key'leri silebiliyoruz
             // Gerçek implementasyonda Redis ConnectionMultiplexer kullanarak pattern-based silme yapılabilir
-            
+
             // Şimdilik sadece exact key'leri silebiliyoruz
             // TODO: Redis ConnectionMultiplexer ile pattern-based silme implemente et
             await Task.CompletedTask;

@@ -42,7 +42,7 @@ namespace DatingWeb.Controllers
         {
             if (this.GetUserId == 2 || this.GetUserId == 17)
                 return Ok(await _settingRepository.UnlockPhone(key));
-            
+
             return Ok();
         }
     }

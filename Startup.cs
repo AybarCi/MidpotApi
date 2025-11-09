@@ -67,19 +67,19 @@ namespace DatingWeb
             System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 
- 
+
             services.AddMemoryCache();
-            
+
             // Redis Configuration
             var redisSettings = Configuration.GetSection("Redis").Get<RedisSettings>();
             services.Configure<RedisSettings>(Configuration.GetSection("Redis"));
-            
+
             services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = redisSettings.ConnectionString;
                 options.InstanceName = "MidpotApp";
             });
-            
+
             services.AddHttpClient();
 
             services.AddCors(options =>
@@ -217,7 +217,7 @@ namespace DatingWeb
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            
+
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
@@ -248,11 +248,11 @@ namespace DatingWeb
                 {
                     options.Transports = HttpTransportType.WebSockets;
                 });
-                
+
                 // Health Check Endpoint
                 endpoints.MapHealthChecks("/health").RequireHost("*:*");
             });
-            
+
 
         }
     }

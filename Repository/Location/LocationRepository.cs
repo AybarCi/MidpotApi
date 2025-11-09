@@ -49,7 +49,7 @@ namespace DatingWeb.Repository.Location
             {
                 return new LocationResponse();
             }
-            
+
         }
 
         public async Task<List<LocationResponse>> GetLocations()

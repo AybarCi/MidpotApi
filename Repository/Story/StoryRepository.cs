@@ -58,14 +58,14 @@ namespace DatingWeb.Repository.Story
                 user_name = userName,
                 is_added_story = true,
             });
-            
+
             return addStories;
         }
 
-        public async Task<List<GetStoriesResponse>> GetStories(long currentUser,string userName,string profilePhoto,List<GetStoriesRequest> getStoriesRequest)
+        public async Task<List<GetStoriesResponse>> GetStories(long currentUser, string userName, string profilePhoto, List<GetStoriesRequest> getStoriesRequest)
         {
             List<GetStoriesResponse> getStoriesResponse = new List<GetStoriesResponse>();
-           
+
             var currentStories = await _context.Story.Where(x => x.UserId == currentUser && x.CreateDate.AddDays(1) > DateTime.Now).ToListAsync();
             if (currentStories.Count > 0)
             {
@@ -84,7 +84,8 @@ namespace DatingWeb.Repository.Story
                     stories = userStories,
                     is_added_story = false,
                 });
-            } else
+            }
+            else
             {
                 List<UserStory> userStories = new List<UserStory>();
                 userStories.Add(new UserStory { story_id = currentUser, story_image = "", swipeText = "Custom swipe text for this story" });

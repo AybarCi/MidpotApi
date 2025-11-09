@@ -63,7 +63,7 @@ namespace DatingWeb.Controllers
                     throw new ApiException("Şifre minimum 6 karakter olmalı!");
 
                 string cacheKey = $"login_attempt_{model.PhoneNumber}";
-                
+
                 // Rate limiting için cache kontrolü
                 var cachedAttempt = await _redisCache.GetAsync<int>(cacheKey);
                 if (cachedAttempt >= 5) // 5 denemeden fazla
@@ -74,10 +74,10 @@ namespace DatingWeb.Controllers
                 try
                 {
                     var result = await _authRepository.Login(model.PhoneNumber, model.Password, model.DeviceToken, model.Platform);
-                    
+
                     // Başarılı girişte cache'i temizle
                     await _redisCache.RemoveAsync(cacheKey);
-                    
+
                     return Ok(result);
                 }
                 catch (ApiException)

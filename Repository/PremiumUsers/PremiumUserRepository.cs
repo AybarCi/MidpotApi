@@ -44,21 +44,21 @@ namespace DatingWeb.Repository.PremiumUsers
         }
         public async Task<List<PremiumUserResponse>> GetPremiumUsers()
         {
-            return  await (from pu in _context.PremiumUser
-                    join u in _context.ApplicationUsers on pu.UserId equals u.Id into puu
-                    from premiumUser in puu.DefaultIfEmpty()
-                    where pu.UserId != 17
-                    orderby pu.PurchaseDate descending
-                    select new PremiumUserResponse
-                    {
-                        ExpiresDate = pu.ExpiresDate,
-                        ProductId = pu.ProductId,
-                        PurchaseDate = pu.PurchaseDate,
-                        TransactionId = pu.TransactionId,
-                        UserId = pu.UserId,
-                        UserName = premiumUser.PersonName,
-                        ProfilePhoto = premiumUser.ProfilePhoto
-                    }).ToListAsync();
+            return await (from pu in _context.PremiumUser
+                          join u in _context.ApplicationUsers on pu.UserId equals u.Id into puu
+                          from premiumUser in puu.DefaultIfEmpty()
+                          where pu.UserId != 17
+                          orderby pu.PurchaseDate descending
+                          select new PremiumUserResponse
+                          {
+                              ExpiresDate = pu.ExpiresDate,
+                              ProductId = pu.ProductId,
+                              PurchaseDate = pu.PurchaseDate,
+                              TransactionId = pu.TransactionId,
+                              UserId = pu.UserId,
+                              UserName = premiumUser.PersonName,
+                              ProfilePhoto = premiumUser.ProfilePhoto
+                          }).ToListAsync();
         }
         public async Task<int> GetPremiumUsersCount()
         {

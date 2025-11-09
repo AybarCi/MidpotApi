@@ -10,7 +10,7 @@ namespace DatingWeb.Repository.Story.Interface
     public interface IStoryRepository
     {
         Task<List<AddStoryPhotoResponse>> AddStoryPhoto(long userId, IFormFile file, string profilePhoto, string userName);
-        Task<List<GetStoriesResponse>> GetStories(long currentUser,string userName, string profilePhoto, List<GetStoriesRequest> getStoriesRequest);
+        Task<List<GetStoriesResponse>> GetStories(long currentUser, string userName, string profilePhoto, List<GetStoriesRequest> getStoriesRequest);
     }
 }
 

@@ -46,14 +46,14 @@ namespace DatingWeb.Repository.Matches
         public async Task<List<MatchResponse>> MatchMachine(long userId, bool gender, bool preferredGender, DateTime lastMatchDate, double latitude, double longitude)
         {
             string cacheKey = $"user_matches_{userId}_{gender}_{preferredGender}";
-            
+
             // Redis cache'ten kontrol et
             var cachedMatches = await _redisCache.GetAsync<List<MatchResponse>>(cacheKey);
             if (cachedMatches != null)
             {
                 return cachedMatches;
             }
-            
+
             var returnedUser = new List<MatchResponse>();
 
             //Aktif match var mı
@@ -275,11 +275,11 @@ namespace DatingWeb.Repository.Matches
             await _context.SaveChangesAsync();
 
             _cache.Set(match.MatchId.ToString(), matchId);
-            
+
             // Redis cache'ini temizle - hem match cache'i hem de user profile cache'i
             string matchCacheKey = $"user_matches_{userId}_";
             await _redisCache.RemovePatternAsync(matchCacheKey); // Tüm match pattern'larını temizle
-            
+
             return true;
         }
         public async Task SendNotification(string matchId, long to)

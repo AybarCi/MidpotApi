@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DatingWeb.Model.Request
 {
-	public class AddUserRequest
-	{
+    public class AddUserRequest
+    {
         public string PersonName { get; set; }
         public DateTime BirthDate { get; set; }
         public bool Gender { get; set; }
@@ -15,6 +15,6 @@ namespace DatingWeb.Model.Request
         public float Latitude { get; set; }
         public float Longitude { get; set; }
         public string UserName { get; set; }
-    }    
+    }
 }
 

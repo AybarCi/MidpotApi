@@ -78,7 +78,7 @@ namespace DatingWeb.Repository.Settings
             {
                 throw new Exception(ex.Message.ToString());
             }
-            
+
 
             _cache.Set(key, setting.Value, TimeSpan.FromHours(1000));
 

@@ -41,14 +41,14 @@ namespace DatingWeb.Repository.User
         public async Task<UserResponse> GetProfile(long userId)
         {
             string cacheKey = $"user_profile_{userId}";
-            
+
             // Redis cache'ten kontrol et
             var cachedProfile = await _redisCache.GetAsync<UserResponse>(cacheKey);
             if (cachedProfile != null)
             {
                 return cachedProfile;
             }
-            
+
             // Cache'te yoksa veritabanından getir
             var profile = await _context.ApplicationUsers.Where(x => x.Id == userId && x.LockoutEnabled == false).Select(x => new UserResponse
             {
@@ -60,13 +60,13 @@ namespace DatingWeb.Repository.User
                 Email = x.Email,
                 GhostMode = x.GhostMode
             }).FirstOrDefaultAsync();
-            
+
             // Veriyi Redis'e cache'le
             if (profile != null)
             {
                 await _redisCache.SetAsync(cacheKey, profile, TimeSpan.FromMinutes(30)); // 30 dakika cache
             }
-            
+
             return profile;
         }
 
@@ -202,15 +202,15 @@ namespace DatingWeb.Repository.User
             return await _context.ApplicationUsers.Where(x => x.CreateDate > DateTime.Now.AddDays(-7))
                 .OrderBy(x => x.CreateDate)
                 .Select(x => new UserResponse
-            {
-                BirthDate = x.BirthDate,
-                Gender = x.Gender,
-                PersonName = x.PersonName,
-                PreferredGender = x.PreferredGender,
-                UserId = x.Id,
-                Email = x.Email,
-                GhostMode = x.GhostMode
-            }).ToListAsync();
+                {
+                    BirthDate = x.BirthDate,
+                    Gender = x.Gender,
+                    PersonName = x.PersonName,
+                    PreferredGender = x.PreferredGender,
+                    UserId = x.Id,
+                    Email = x.Email,
+                    GhostMode = x.GhostMode
+                }).ToListAsync();
         }
 
         public async Task<int> GetAllUsersCount()

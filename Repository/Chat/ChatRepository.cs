@@ -39,7 +39,7 @@ namespace DatingWeb.Repository.Chat
                 }
                 await _context.SaveChangesAsync();
             }
-            
+
             return true;
         }
 
@@ -83,7 +83,7 @@ namespace DatingWeb.Repository.Chat
 
         public async Task<List<NewMessagesResponse>> GetNewMessages(long userId)
         {
-            var matches = await _context.Match.Where(x => x.FemaleUser == userId || x.MaleUser == userId && x.IsActive == true).Select(x=> x.MatchId).ToListAsync();
+            var matches = await _context.Match.Where(x => x.FemaleUser == userId || x.MaleUser == userId && x.IsActive == true).Select(x => x.MatchId).ToListAsync();
             if (matches.Count > 0)
             {
                 return await _context.Message.Where(x => matches.Contains(x.MatchId) && x.IsRead == false && x.UserId != userId).GroupBy(x => x.UserId).Select(
