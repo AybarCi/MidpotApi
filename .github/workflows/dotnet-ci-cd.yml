@@ -1,0 +1,231 @@
+name: .NET CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '7.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: midpot_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build application
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Run tests
+      run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      env:
+        ConnectionStrings__PostgreConnection: "Host=localhost;Database=midpot_test;Username=postgres;Password=postgres"
+        Redis__ConnectionString: "localhost:6379"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: '**/TestResults/**'
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: '**/coverage.cobertura.xml'
+        flags: unittests
+        name: codecov-umbrella
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build application
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Run security scan
+      run: |
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee security-report.txt
+        if grep -q "has the following vulnerable packages" security-report.txt; then
+          echo "Security vulnerabilities found!"
+          exit 1
+        fi
+
+  code-quality:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build application
+      run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Run code analysis
+      run: dotnet format --verify-no-changes --verbosity diagnostic
+
+    - name: Run dotnet format check
+      run: |
+        dotnet format --verify-no-changes
+        if [ $? -ne 0 ]; then
+          echo "Code formatting issues found. Run 'dotnet format' to fix them."
+          exit 1
+        fi
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan, code-quality]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Publish application
+      run: dotnet publish --configuration ${{ env.CONFIGURATION }} --output ./publish
+
+    - name: Upload publish artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: publish-artifacts
+        path: ./publish
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your staging deployment commands here
+        # Example: Azure, AWS, Docker deployment etc.
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan, code-quality]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Publish application
+      run: dotnet publish --configuration ${{ env.CONFIGURATION }} --output ./publish
+
+    - name: Upload publish artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: publish-artifacts
+        path: ./publish
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment commands here
+        # Example: Azure, AWS, Docker deployment etc.
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ secrets.DOCKERHUB_USERNAME }}/midpotapi:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/midpotapi:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
