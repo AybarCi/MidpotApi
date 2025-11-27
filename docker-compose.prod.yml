@@ -56,7 +56,7 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      - ./.env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:80
