@@ -45,16 +45,10 @@ services:
       retries: 3
       start_period: 10s
 
-  # Midpot API Application
+  # Midpot API Application - Production (using pre-built image from GHCR)
   midpot-api:
-    # Use pre-built image from GitHub Container Registry (production)
-    # Comment out 'image' and uncomment 'build' for local development
+    # Pull pre-built image from GitHub Container Registry
     image: ${DOCKER_IMAGE:-ghcr.io/aybarci/midpotapi:latest}
-    
-    # Uncomment for local development build
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile.production
     
     container_name: midpot-api
     restart: unless-stopped
@@ -113,7 +107,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # Nginx Reverse Proxy (Optional - for production)
+  # Nginx Reverse Proxy (Optional - for production with SSL)
   nginx:
     image: nginx:alpine
     container_name: midpot-nginx

@@ -4,11 +4,11 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-# Create non-root user for security
-RUN addgroup -g 1001 -S appuser && adduser -S appuser -u 1001
+# Create non-root user for security (Debian syntax)
+RUN groupadd -g 1001 appuser && useradd -r -u 1001 -g appuser appuser
 
 # Install necessary packages for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
@@ -23,10 +23,7 @@ WORKDIR "/src/."
 RUN dotnet build "DatingWeb.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DatingWeb.csproj" -c Release -o /app/publish \
-    --no-restore \
-    --no-build \
-    --verbosity normal
+RUN dotnet publish "DatingWeb.csproj" -c Release -o /app/publish
 
 # Final stage
 FROM base AS final
@@ -38,6 +35,10 @@ RUN mkdir -p /app/logs && chown -R appuser:appuser /app
 # Copy published application
 COPY --from=publish /app/publish .
 
+# Copy entrypoint script and set permissions
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
 # Set ownership to non-root user
 RUN chown -R appuser:appuser /app
 USER appuser
@@ -45,10 +46,6 @@ USER appuser
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost/health || exit 1
-
-# Use entrypoint script for better container lifecycle management
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["dotnet", "DatingWeb.dll"]

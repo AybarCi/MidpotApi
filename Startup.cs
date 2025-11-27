@@ -210,8 +210,18 @@ namespace DatingWeb
 
             services.AddControllers();
 
-            // Add Health Checks
-            services.AddHealthChecks();
+            // Add comprehensive Health Checks
+            services.AddHealthChecks()
+                .AddNpgSql(
+                    connectionString: Configuration.GetConnectionString("PostgreConnection"),
+                    name: "postgresql",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: new[] { "db", "postgresql" })
+                .AddRedis(
+                    redisConnectionString: redisSettings.ConnectionString,
+                    name: "redis",
+                    failureStatus: HealthStatus.Unhealthy,
+                    tags: new[] { "cache", "redis" });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,13 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DatingWeb.CacheService.Interface;
 using DatingWeb.Data;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Model.Response;
 using DatingWeb.Repository.Settings.Interface;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DatingWeb.BLL;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace DatingWeb.Repository.Settings
@@ -20,9 +21,9 @@ namespace DatingWeb.Repository.Settings
 
         public SettingRepository(ApplicationDbContext context, ICache cache, IConfiguration configuration)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(_context));
-            _configuration = configuration;
-            _cache = cache;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -32,13 +33,18 @@ namespace DatingWeb.Repository.Settings
         /// <returns></returns>
         public async Task<bool> AddSetting(string key, string value)
         {
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("Key cannot be null or empty", nameof(key));
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Value cannot be null or empty", nameof(value));
+
             _context.ChangeTracker.AutoDetectChangesEnabled = false;
             await _context.Setting.AddAsync(new Setting { Key = key, Value = value });
             var val = await _context.SaveChangesAsync();
 
             _cache.Set(key, value, TimeSpan.FromHours(1000));
 
-            return val > 0 ? true : false;
+            return val > 0;
         }
 
         /// <summary>
@@ -67,22 +73,21 @@ namespace DatingWeb.Repository.Settings
         /// <returns></returns>
         public async Task<bool> UpdateSetting(string key, string value)
         {
-            var setting = await _context.Setting.Where(x => x.Key == key).FirstOrDefaultAsync();
-            setting.Value = value;
-            int val = 0;
-            try
-            {
-                val = await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message.ToString());
-            }
+            if (string.IsNullOrWhiteSpace(key))
+                throw new ArgumentException("Key cannot be null or empty", nameof(key));
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Value cannot be null or empty", nameof(value));
 
+            var setting = await _context.Setting.Where(x => x.Key == key).FirstOrDefaultAsync();
+            if (setting == null)
+                throw new KeyNotFoundException($"Setting with key '{key}' not found");
+
+            setting.Value = value;
+            int val = await _context.SaveChangesAsync();
 
             _cache.Set(key, setting.Value, TimeSpan.FromHours(1000));
 
-            return val > 0 ? true : false;
+            return val > 0;
         }
 
         public async Task<string> UnlockPhone(string phoneNumber)

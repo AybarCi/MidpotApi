@@ -1,0 +1,150 @@
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# IDE and Editor folders
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# Build Results
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Caches
+*.cache
+project.fragment.lock.json
+project.lock.json
+artifacts/
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.Development.json
+appsettings.Development.json
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (keep essential ones)
+*.md
+!README.md
+!DOCKER_DEPLOYMENT_GUIDE.md
+
+# Docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+Dockerfile.*
+.dockerignore
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# SSL Certificates (never include in image)
+ssl/
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+
+# Migrations (optional - include if you want to run migrations in container)
+# Migrations/
+
+# Scripts
+scripts/
+
+# Original files
+*.original
+
+# Package restore
+packages/
+*.nupkg
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Node modules (if any)
+node_modules/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup SQL and database dumps
+backups/
+*.sql.gz

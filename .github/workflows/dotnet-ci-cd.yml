@@ -260,6 +260,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: ./Dockerfile.production
         push: true
         tags: |
           ${{ secrets.DOCKERHUB_USERNAME }}/midpotapi:latest

@@ -29,9 +29,37 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Oo]ut/
+publish/
+app/publish/
 msbuild.log
 msbuild.err
 msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+[Ll]ogs/
+*.log
+
+# SSL Certificates
+ssl/
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+
+# Database backups
+backups/
+*.sql.gz
+*.sql.bak
+
+# Docker volumes
+postgres_data/
+redis_data/

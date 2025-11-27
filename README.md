@@ -83,13 +83,86 @@ dotnet run --urls "http://localhost:5050"
 
 ### Docker Deployment
 
-```bash
-# Build Docker image
-docker build -t midpotapi .
+#### Production Deployment (GitHub Container Registry)
 
-# Run with Docker Compose (recommended)
+**Recommended for production**: Use pre-built images from GitHub Container Registry:
+
+```bash
+# 1. Copy environment template
+cp .env.example .env
+
+# 2. Edit .env with your production values
+nano .env
+
+# 3. Pull and start services
+docker-compose pull
 docker-compose up -d
+
+# OR use production compose file
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d
 ```
+
+**Available image tags:**
+- `ghcr.io/aybarci/midpotapi:latest` - Latest production build (main branch)
+- `ghcr.io/aybarci/midpotapi:develop` - Latest staging build (develop branch)
+- `ghcr.io/aybarci/midpotapi:main-<sha>` - Specific production commit
+- `ghcr.io/aybarci/midpotapi:develop-<sha>` - Specific staging commit
+
+See [GHCR_DEPLOYMENT.md](GHCR_DEPLOYMENT.md) for detailed deployment guide.
+
+#### Local Development (Build from Source)
+
+1. **Setup Environment Variables:**
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env with your production values
+# IMPORTANT: Change all default passwords and keys!
+nano .env
+```
+
+2. **Start Services:**
+```bash
+# Start all services (PostgreSQL, Redis, API)
+docker-compose up -d
+
+# View logs
+docker-compose logs -f midpot-api
+
+# Check service health
+docker-compose ps
+```
+
+3. **Access the Application:**
+- API: http://localhost:5000
+- Swagger: http://localhost:5000/swagger
+- Health Check: http://localhost:5000/health
+
+4. **Stop Services:**
+```bash
+docker-compose down
+```
+
+#### Production Deployment
+
+For production deployment with Nginx reverse proxy and SSL:
+
+1. **Add SSL Certificates:**
+```bash
+mkdir ssl
+cp your_certificate.pem ssl/cert.pem
+cp your_private_key.pem ssl/key.pem
+chmod 600 ssl/key.pem
+```
+
+2. **Deploy with Nginx:**
+```bash
+docker-compose --profile with-proxy up -d
+```
+
+See [DOCKER_DEPLOYMENT_GUIDE.md](DOCKER_DEPLOYMENT_GUIDE.md) for detailed production deployment instructions.
 
 ## API Endpoints
 
@@ -141,25 +214,57 @@ GitHub Actions workflows provide:
 
 ## Environment Variables
 
-### Development
+Create a `.env` file based on `.env.example`:
+
+### Required Variables (Production)
+
 ```bash
-ASPNETCORE_ENVIRONMENT=Development
-ConnectionStrings__PostgreConnection=Host=localhost;Database=midpot;Username=postgres;Password=password
-Redis__ConnectionString=localhost:6379
-JWT__SecretKey=your-secret-key
-JWT__Issuer=MidpotApi
-JWT__Audience=MidpotUsers
+# Database
+POSTGRES_DB=socialdb
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_secure_production_password
+
+# JWT Authentication
+JWT_KEY=your_super_secure_jwt_key_minimum_64_characters_required
+JWT_ISSUER=https://www.midpot.net
+JWT_AUDIENCE=https://www.midpot.net
+JWT_LIFETIME=48
+JWT_REFRESH_LIFETIME=360
+
+# Security
+SECURITY_KEY=your_security_key_for_encryption
+
+# Distance Configuration
+DISTANCE_LIMIT=100
+
+# Redis Cache
+REDIS_DEFAULT_EXPIRY=60
+REDIS_USER_PROFILE_EXPIRY=120
+REDIS_MATCH_EXPIRY=30
+REDIS_LOCATION_EXPIRY=15
 ```
 
-### Production
+### Optional Variables
+
 ```bash
-ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__PostgreConnection=Host=prod-server;Database=midpot;Username=postgres;Password=secure-password
-Redis__ConnectionString=redis-prod-server:6379
-JWT__SecretKey=very-secure-secret-key
-JWT__Issuer=MidpotApi
-JWT__Audience=MidpotUsers
+# Azure Blob Storage (for file uploads)
+AZURE_BLOB_STORAGE=DefaultEndpointsProtocol=https;AccountName=your_account;AccountKey=your_key;EndpointSuffix=core.windows.net
+
+# Firebase Cloud Messaging (for push notifications)
+FCM_SENDER_ID=your_sender_id
+FCM_SERVER_KEY=your_server_key
+
+# SMS Service (for verification)
+SMS_SERVICE_URL=https://api.vatansms.net/api/v1/1toN
+SMS_USER_ID=your_sms_user_id
+SMS_PASSWORD=your_sms_password
+SMS_SENDER=YourAppName
+
+# Database Migrations
+RUN_MIGRATIONS=false  # Set to 'true' to auto-run migrations on container startup
 ```
+
+**Security Note:** Never commit the `.env` file to version control!
 
 ## Contributing
 
