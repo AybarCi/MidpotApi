@@ -55,28 +55,40 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    env_file:
-      - ./.env
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:80
       
-      # Database Configuration - External PostgreSQL Server
-      ConnectionStrings__PostgreConnection: "Host=172.17.0.9;Port=5432;Database=${POSTGRES_DB:-socialdb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD};Pooling=true;MinPoolSize=10;MaxPoolSize=100;ConnectionLifetime=0;CommandTimeout=30;"
+      # Database Configuration
+      POSTGRES_DB: socialdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SeKo153759++
+      
+      # Database Connection
+      ConnectionStrings__PostgreConnection: "Host=172.17.0.9;Port=5432;Database=socialdb;Username=postgres;Password=SeKo153759++;Pooling=true;MinPoolSize=10;MaxPoolSize=100;ConnectionLifetime=0;CommandTimeout=30;"
       
       # Redis Configuration
       Redis__ConnectionString: "redis:6379,abortConnect=false,connectTimeout=5000,ssl=false"
-      Redis__DefaultExpiryMinutes: ${REDIS_DEFAULT_EXPIRY:-60}
-      Redis__UserProfileExpiryMinutes: ${REDIS_USER_PROFILE_EXPIRY:-120}
-      Redis__MatchResultsExpiryMinutes: ${REDIS_MATCH_EXPIRY:-30}
-      Redis__LocationDataExpiryMinutes: ${REDIS_LOCATION_EXPIRY:-15}
+      Redis__DefaultExpiryMinutes: 60
+      Redis__UserProfileExpiryMinutes: 120
+      Redis__MatchResultsExpiryMinutes: 30
+      Redis__LocationDataExpiryMinutes: 15
+      REDIS_DEFAULT_EXPIRY: 60
+      REDIS_USER_PROFILE_EXPIRY: 120
+      REDIS_MATCH_EXPIRY: 30
+      REDIS_LOCATION_EXPIRY: 15
       
       # JWT Configuration
-      Tokens__Key: ${JWT_KEY}
-      Tokens__Issuer: ${JWT_ISSUER:-https://www.midpot.net}
-      Tokens__Audience: ${JWT_AUDIENCE:-https://www.midpot.net}
-      Tokens__Lifetime: ${JWT_LIFETIME:-48}
-      Tokens__RefreshTokenLifetime: ${JWT_REFRESH_LIFETIME:-360}
+      JWT_KEY: change_this_to_a_very_long_random_secret_key_at_least_64_chars
+      JWT_ISSUER: https://www.midpot.net
+      JWT_AUDIENCE: https://www.midpot.net
+      JWT_LIFETIME: 48
+      JWT_REFRESH_LIFETIME: 360
+      Tokens__Key: change_this_to_a_very_long_random_secret_key_at_least_64_chars
+      Tokens__Issuer: https://www.midpot.net
+      Tokens__Audience: https://www.midpot.net
+      Tokens__Lifetime: 48
+      Tokens__RefreshTokenLifetime: 360
       
       # External Services
       AzureBlobStorage: ${AZURE_BLOB_STORAGE:-}
