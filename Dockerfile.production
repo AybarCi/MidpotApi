@@ -1,51 +1,12 @@
-# Multi-stage build for production optimization
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
-# Create non-root user for security (Debian syntax)
-RUN groupadd -g 1001 appuser && useradd -r -u 1001 -g appuser appuser
-
-# Install necessary packages for health checks
-RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
-
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-
-# Copy csproj and restore dependencies
-COPY ["DatingWeb.csproj", "."]
-RUN dotnet restore "./DatingWeb.csproj"
-
-# Copy source code and build
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "DatingWeb.csproj" -c Release -o /app/build
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/out
 
-FROM build AS publish
-RUN dotnet publish "DatingWeb.csproj" -c Release -o /app/publish
-
-# Final stage
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-
-# Create logs directory
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app
-
-# Copy published application
-COPY --from=publish /app/publish .
-
-# Copy entrypoint script and set permissions
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
-# Set ownership to non-root user
-RUN chown -R appuser:appuser /app
-USER appuser
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost/health || exit 1
-
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["dotnet", "DatingWeb.dll"]
+COPY --from=build /app/out .
+ENV ASPNETCORE_URLS=http://+:80
+EXPOSE 80
+ENTRYPOINT ["dotnet", "DatingWeb.dll"]

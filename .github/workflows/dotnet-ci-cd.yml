@@ -155,6 +155,9 @@ jobs:
     needs: [build-and-test, security-scan, code-quality]
     if: github.ref == 'refs/heads/develop'
     environment: staging
+    permissions:
+      contents: read
+      packages: write
     
     steps:
     - name: Checkout code
@@ -174,7 +177,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository }}
+        images: ghcr.io/aybarci/midpotapi
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -202,6 +205,9 @@ jobs:
     needs: [build-and-test, security-scan, code-quality]
     if: github.ref == 'refs/heads/main'
     environment: production
+    permissions:
+      contents: read
+      packages: write
     
     steps:
     - name: Checkout code
@@ -221,7 +227,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository }}
+        images: ghcr.io/aybarci/midpotapi
         tags: |
           type=ref,event=branch
           type=ref,event=pr
