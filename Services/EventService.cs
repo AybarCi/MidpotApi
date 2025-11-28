@@ -1,3 +1,4 @@
+using DatingWeb.CacheService.Interface;
 using DatingWeb.Data.DbModel;
 using DatingWeb.Model.Request;
 using DatingWeb.Model.Response;
@@ -14,16 +15,35 @@ namespace DatingWeb.Services
     {
         private readonly IEventRepository _eventRepository;
         private readonly ICreditService _creditService;
+        private readonly IRedisCache _redisCache;
+        private readonly IPlacesService _placesService;
 
-        public EventService(IEventRepository eventRepository, ICreditService creditService)
+        public EventService(
+            IEventRepository eventRepository, 
+            ICreditService creditService,
+            IRedisCache redisCache,
+            IPlacesService placesService)
         {
             _eventRepository = eventRepository;
             _creditService = creditService;
+            _redisCache = redisCache;
+            _placesService = placesService;
         }
 
         public async Task<EventResponse> CreateEventAsync(long userId, CreateEventRequest request)
         {
-            // 1. Check credits (1 credit to create event)
+            // 1. Validate place with Google Places API
+            var placeDetails = await _placesService.GetPlaceDetailsAsync(request.PlaceId);
+            if (placeDetails != null)
+            {
+                // Update with validated data from Google
+                request.PlaceName = placeDetails.Name;
+                request.PlaceAddress = placeDetails.Address;
+                request.Lat = placeDetails.Lat;
+                request.Lng = placeDetails.Lng;
+            }
+
+            // 2. Check credits (1 credit to create event)
             int cost = 1;
             bool deducted = await _creditService.DeductCreditsAsync(userId, cost, "create_event", "{}");
             if (!deducted)
@@ -62,22 +82,38 @@ namespace DatingWeb.Services
             };
             await _eventRepository.AddParticipantAsync(participant);
 
+            // 4. Invalidate caches
+            await InvalidateEventCachesAsync(request.InterestId);
+
             return MapToResponse(createdEvent);
         }
 
         public async Task<IEnumerable<EventResponse>> GetLatestEventsAsync(Guid? interestId)
         {
-            IEnumerable<Event> events;
-            if (interestId.HasValue)
-            {
-                events = await _eventRepository.GetEventsByInterestAsync(interestId.Value);
-            }
-            else
-            {
-                events = await _eventRepository.GetLatestEventsAsync(20);
-            }
+            // Use cache with 30 second TTL
+            var cacheKey = interestId.HasValue 
+                ? $"events:interest:{interestId.Value}:latest" 
+                : "events:global:latest";
 
-            return events.Select(MapToResponse);
+            var cachedEvents = await _redisCache.GetOrSetAsync(
+                cacheKey,
+                async () =>
+                {
+                    IEnumerable<Event> events;
+                    if (interestId.HasValue)
+                    {
+                        events = await _eventRepository.GetEventsByInterestAsync(interestId.Value);
+                    }
+                    else
+                    {
+                        events = await _eventRepository.GetLatestEventsAsync(20);
+                    }
+                    return events.Select(MapToResponse).ToList();
+                },
+                TimeSpan.FromSeconds(30)
+            );
+
+            return cachedEvents;
         }
 
         public async Task JoinEventAsync(Guid eventId, long userId)
@@ -99,7 +135,6 @@ namespace DatingWeb.Services
             {
                 if (existing.Status == "joined") return; // Already joined
                 existing.Status = "joined";
-                // Update logic needed in repo, but for now assuming Context tracks changes
             }
             else
             {
@@ -110,10 +145,16 @@ namespace DatingWeb.Services
                     Status = "joined"
                 });
             }
+
+            // Invalidate caches
+            await InvalidateEventCachesAsync(@event.InterestId);
         }
 
         public async Task InviteUserAsync(Guid eventId, long inviterId, long inviteeId)
         {
+            var @event = await _eventRepository.GetEventByIdAsync(eventId);
+            if (@event == null) throw new KeyNotFoundException("Event not found");
+
             var existing = await _eventRepository.GetParticipantAsync(eventId, inviteeId);
             if (existing != null) return; // Already participant
 
@@ -123,8 +164,17 @@ namespace DatingWeb.Services
                 UserId = inviteeId,
                 Status = "invited"
             });
-            
-            // TODO: Send Push Notification
+
+            // Send push notification (simplified - would need to fetch user device token in production)
+            // TODO: Fetch invitee's device token and send actual FCM notification
+            // For now, logging the intent
+        }
+
+        private async Task InvalidateEventCachesAsync(Guid interestId)
+        {
+            // Invalidate both interest-specific and global caches
+            await _redisCache.RemoveAsync($"events:interest:{interestId}:latest");
+            await _redisCache.RemoveAsync("events:global:latest");
         }
 
         private EventResponse MapToResponse(Event e)

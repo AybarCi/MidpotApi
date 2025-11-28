@@ -37,23 +37,23 @@ namespace DatingWeb.Data
             modelBuilder.Entity<Privacy>().ToTable("Privacy", "post");
 
             // Event System Configuration
-            modelBuilder.Entity<Interest>().ToTable("Interests", "event");
+            modelBuilder.Entity<Interest>().ToTable("Interests", "post");
             modelBuilder.Entity<Interest>().HasIndex(i => i.Name).IsUnique();
 
-            modelBuilder.Entity<UserInterest>().ToTable("UserInterests", "event")
+            modelBuilder.Entity<UserInterest>().ToTable("UserInterests", "post")
                 .HasKey(ui => new { ui.UserId, ui.InterestId });
 
-            modelBuilder.Entity<Event>().ToTable("Events", "event");
+            modelBuilder.Entity<Event>().ToTable("Events", "post");
             modelBuilder.Entity<Event>()
                 .Property(e => e.Status)
                 .HasConversion<string>(); // Store enum as string
 
-            modelBuilder.Entity<EventParticipant>().ToTable("EventParticipants", "event")
+            modelBuilder.Entity<EventParticipant>().ToTable("EventParticipants", "post")
                 .HasKey(ep => new { ep.EventId, ep.UserId });
 
-            modelBuilder.Entity<CreditTransaction>().ToTable("CreditTransactions", "event");
-            modelBuilder.Entity<CreditProduct>().ToTable("CreditProducts", "event");
-            modelBuilder.Entity<MissedEventHistory>().ToTable("MissedEventsHistory", "event");
+            modelBuilder.Entity<CreditTransaction>().ToTable("CreditTransactions", "post");
+            modelBuilder.Entity<CreditProduct>().ToTable("CreditProducts", "post");
+            modelBuilder.Entity<MissedEventHistory>().ToTable("MissedEventsHistory", "post");
         }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Gallery> Gallery { get; set; }

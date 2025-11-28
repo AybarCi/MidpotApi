@@ -189,6 +189,7 @@ namespace DatingWeb
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<ICreditService, CreditService>();
             services.AddScoped<IInterestRepository, InterestRepository>();
+            services.AddScoped<IPlacesService, PlacesService>();
 
             services.AddSwaggerGen(c =>
             {

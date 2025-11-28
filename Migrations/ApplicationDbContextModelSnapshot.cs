@@ -165,7 +165,7 @@ namespace DatingWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CreditProducts", "event");
+                    b.ToTable("CreditProducts", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.CreditTransaction", b =>
@@ -197,7 +197,7 @@ namespace DatingWeb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CreditTransactions", "event");
+                    b.ToTable("CreditTransactions", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.Event", b =>
@@ -259,7 +259,7 @@ namespace DatingWeb.Migrations
 
                     b.HasIndex("InterestId");
 
-                    b.ToTable("Events", "event");
+                    b.ToTable("Events", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.EventParticipant", b =>
@@ -290,7 +290,7 @@ namespace DatingWeb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("EventParticipants", "event");
+                    b.ToTable("EventParticipants", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.Gallery", b =>
@@ -330,7 +330,7 @@ namespace DatingWeb.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Interests", "event");
+                    b.ToTable("Interests", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.Location", b =>
@@ -436,7 +436,7 @@ namespace DatingWeb.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MissedEventsHistory", "event");
+                    b.ToTable("MissedEventsHistory", "post");
                 });
 
             modelBuilder.Entity("DatingWeb.Data.DbModel.PremiumUser", b =>
@@ -565,7 +565,7 @@ namespace DatingWeb.Migrations
 
                     b.HasIndex("InterestId");
 
-                    b.ToTable("UserInterests", "event");
+                    b.ToTable("UserInterests", "post");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<long>", b =>
