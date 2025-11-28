@@ -45,13 +45,9 @@ services:
       retries: 3
       start_period: 10s
 
-  # Midpot API Application - Production (build from source)
+  # Midpot API Application - Production
   midpot-api:
-    # Build from Dockerfile instead of using pre-built image
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: midpotapi:local
+    image: ghcr.io/aybarci/midpotapi:latest
     
     container_name: midpot-api
     restart: unless-stopped

@@ -63,6 +63,15 @@ jobs:
     - name: Build application
       run: dotnet build --configuration ${{ env.CONFIGURATION }} --no-restore
 
+    - name: Pack NuGet package
+      run: dotnet pack --configuration ${{ env.CONFIGURATION }} --no-build --output nupkgs
+
+    - name: Upload NuGet package artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: nupkgs/*.nupkg
+
     - name: Run tests
       run: dotnet test --configuration ${{ env.CONFIGURATION }} --no-build --verbosity normal --collect:"XPlat Code Coverage"
       env:
@@ -159,7 +168,7 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
     - name: Extract metadata
       id: meta

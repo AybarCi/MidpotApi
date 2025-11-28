@@ -49,6 +49,12 @@ using DatingWeb.Repository.Location.Interface;
 using DatingWeb.Repository.Location;
 using DatingWeb.Repository.Privacy.Interface;
 using DatingWeb.Repository.Privacy;
+using DatingWeb.Repository.Event;
+using DatingWeb.Repository.Event.Interface;
+using DatingWeb.Repository.Credit;
+using DatingWeb.Repository.Credit.Interface;
+using DatingWeb.Repository.Interest;
+using DatingWeb.Repository.Interest.Interface;
 
 namespace DatingWeb
 {
@@ -176,6 +182,13 @@ namespace DatingWeb
             services.AddScoped<IStoryRepository, StoryRepository>();
             services.AddScoped<ILocationRepository, LocationRepository>();
             services.AddScoped<IPrivacyRepository, PrivacyRepository>();
+            
+            // Event & Credit System Services
+            services.AddScoped<IEventRepository, EventRepository>();
+            services.AddScoped<ICreditRepository, CreditRepository>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ICreditService, CreditService>();
+            services.AddScoped<IInterestRepository, InterestRepository>();
 
             services.AddSwaggerGen(c =>
             {
@@ -222,6 +235,8 @@ namespace DatingWeb
                     name: "redis",
                     failureStatus: HealthStatus.Unhealthy,
                     tags: new[] { "cache", "redis" });
+
+            services.AddHostedService<EventBackgroundWorker>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -35,6 +35,25 @@ namespace DatingWeb.Data
             modelBuilder.Entity<Report>().ToTable("Report", "post");
             modelBuilder.Entity<Story>().ToTable("Story", "post");
             modelBuilder.Entity<Privacy>().ToTable("Privacy", "post");
+
+            // Event System Configuration
+            modelBuilder.Entity<Interest>().ToTable("Interests", "event");
+            modelBuilder.Entity<Interest>().HasIndex(i => i.Name).IsUnique();
+
+            modelBuilder.Entity<UserInterest>().ToTable("UserInterests", "event")
+                .HasKey(ui => new { ui.UserId, ui.InterestId });
+
+            modelBuilder.Entity<Event>().ToTable("Events", "event");
+            modelBuilder.Entity<Event>()
+                .Property(e => e.Status)
+                .HasConversion<string>(); // Store enum as string
+
+            modelBuilder.Entity<EventParticipant>().ToTable("EventParticipants", "event")
+                .HasKey(ep => new { ep.EventId, ep.UserId });
+
+            modelBuilder.Entity<CreditTransaction>().ToTable("CreditTransactions", "event");
+            modelBuilder.Entity<CreditProduct>().ToTable("CreditProducts", "event");
+            modelBuilder.Entity<MissedEventHistory>().ToTable("MissedEventsHistory", "event");
         }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Gallery> Gallery { get; set; }
@@ -46,5 +65,14 @@ namespace DatingWeb.Data
         public DbSet<Story> Story { get; set; }
         public DbSet<Location> Location { get; set; }
         public DbSet<Privacy> Privacy { get; set; }
+
+        // Event System DbSets
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Interest> Interests { get; set; }
+        public DbSet<UserInterest> UserInterests { get; set; }
+        public DbSet<EventParticipant> EventParticipants { get; set; }
+        public DbSet<CreditTransaction> CreditTransactions { get; set; }
+        public DbSet<CreditProduct> CreditProducts { get; set; }
+        public DbSet<MissedEventHistory> MissedEventsHistory { get; set; }
     }
 }

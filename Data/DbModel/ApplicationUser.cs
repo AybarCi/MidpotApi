@@ -30,5 +30,9 @@ namespace DatingWeb.Data.DbModel
         public bool IsDelete { get; set; } = false;
         public DateTime CreateDate { get; set; }
         public bool GhostMode { get; set; }
+        
+        // Event System Fields
+        public int MissedEventCount { get; set; } = 0;
+        public DateTime? IsSuspendedUntil { get; set; }
     }
 }

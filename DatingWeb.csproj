@@ -5,6 +5,11 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
     <UserSecretsId>6b18e24b-5800-4f45-b84f-611838ffc06e</UserSecretsId>
+    <IsPackable>true</IsPackable>
+    <Version>1.0.0-beta.$(BuildNumber)</Version>
+    <Authors>Aybar Ci</Authors>
+    <PackageId>MidpotApi</PackageId>
+    <Description>Midpot API - Social Dating Platform Backend</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Custom' " />
