@@ -47,7 +47,7 @@ services:
 
   # Midpot API Application - Production
   midpot-api:
-    image: ${DOCKER_IMAGE:-ghcr.io/cihanaybar/midpotapp/midpotapi:latest}
+    image: ${DOCKER_IMAGE:-ghcr.io/aybarci/midpotapi:latest}
     
     container_name: midpot-api
     restart: unless-stopped
